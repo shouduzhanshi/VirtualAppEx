@@ -29,7 +29,7 @@
             android:theme="@style/UITheme" />
 
         <activity
-            android:name=".home.ListAppActivity"
+            android:name=".home.listapp.ListAppActivity"
             android:screenOrientation="portrait"
             android:theme="@style/UITheme" />
 

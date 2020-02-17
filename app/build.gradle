@@ -6,8 +6,8 @@ android {
     buildToolsVersion '26.0.2'
     defaultConfig {
         applicationId "io.virtualapp.ex"
-        minSdkVersion 15
-        targetSdkVersion 22
+        minSdkVersion 20
+        targetSdkVersion 26
         versionCode 24
         versionName "1.2.5"
         multiDexEnabled true

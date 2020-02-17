@@ -1,4 +1,4 @@
-package io.virtualapp.home;
+package io.virtualapp.home.listapp;
 
 import java.util.List;
 
