@@ -10,6 +10,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.Toast;
 
@@ -38,13 +39,13 @@ public class ListAppFragment extends VFragment<ListAppContract.ListAppPresenter>
     private Button mInstallButton;
     private CloneAppListAdapter mAdapter;
 
-    public static ListAppFragment newInstance(File selectFrom, int position) {
+    public static ListAppFragment newInstance(File selectFrom) {
         Bundle args = new Bundle();
         if (selectFrom != null) {
             args.putString(KEY_SELECT_FROM, selectFrom.getPath());
         }
-        args.putInt("TYPE", position);
         ListAppFragment fragment = new ListAppFragment();
+//        args.putInt("type", position);
         fragment.setArguments(args);
         return fragment;
     }
@@ -72,6 +73,13 @@ public class ListAppFragment extends VFragment<ListAppContract.ListAppPresenter>
         mAdapter.saveInstanceState(outState);
     }
 
+    private void onAddAppFromDiskClick() {
+        Intent intent = new Intent(Intent.ACTION_GET_CONTENT);
+        intent.setType("*/*");//无类型限制
+        intent.addCategory(Intent.CATEGORY_OPENABLE);
+        getActivity().startActivityForResult(intent, 9101);
+    }
+
     @Override
     public void onViewCreated(View view, Bundle savedInstanceState) {
         mRecyclerView = (DragSelectRecyclerView) view.findViewById(R.id.select_app_recycler_view);
@@ -84,6 +92,10 @@ public class ListAppFragment extends VFragment<ListAppContract.ListAppPresenter>
         mAdapter.setOnItemClickListener(new CloneAppListAdapter.ItemEventListener() {
             @Override
             public void onItemClick(AppInfo info, int position) {
+                if (info.type == 1) {
+                    onAddAppFromDiskClick();
+                    return;
+                }
                 int count = mAdapter.getSelectedCount();
                 if (!mAdapter.isIndexSelected(position)) {
                     if (count >= 9) {
@@ -131,6 +143,11 @@ public class ListAppFragment extends VFragment<ListAppContract.ListAppPresenter>
         mAdapter.setSelected(0, false);
         mProgressBar.setVisibility(View.GONE);
         mRecyclerView.setVisibility(View.VISIBLE);
+        AppInfo appInfo = new AppInfo();
+        appInfo.icon = getResources().getDrawable(R.drawable.ic_add_circle);
+        appInfo.name = "从磁盘添加";
+        appInfo.type = 1;
+        infoList.add(0, appInfo);
     }
 
     @Override

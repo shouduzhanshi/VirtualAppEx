@@ -3,6 +3,7 @@
     package="io.virtualapp">
 
     <uses-permission android:name="android.permission.INTERNET" />
+
     <application
         android:name=".VApp"
         android:allowBackup="true"

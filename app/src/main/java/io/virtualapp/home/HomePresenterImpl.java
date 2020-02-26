@@ -1,7 +1,10 @@
 package io.virtualapp.home;
 
 import android.app.Activity;
+import android.content.Intent;
 import android.graphics.Bitmap;
+import android.net.Uri;
+import android.util.Log;
 
 import com.lody.virtual.GmsSupport;
 import com.lody.virtual.client.core.VirtualCore;
@@ -10,7 +13,10 @@ import com.lody.virtual.os.VUserManager;
 import com.lody.virtual.remote.InstallResult;
 import com.lody.virtual.remote.InstalledAppInfo;
 
+import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.io.InputStream;
 
 import io.virtualapp.VCommends;
 import io.virtualapp.abs.ui.VUiKit;
@@ -21,6 +27,10 @@ import io.virtualapp.home.models.PackageAppData;
 import io.virtualapp.home.repo.AppRepository;
 import io.virtualapp.home.repo.PackageAppDataStorage;
 import jonathanfinerty.once.Once;
+import okio.BufferedSink;
+import okio.BufferedSource;
+import okio.Okio;
+import okio.Source;
 
 /**
  * @author Lody
@@ -76,6 +86,37 @@ class HomePresenterImpl implements HomeContract.HomePresenter {
         mRepo.getVirtualApps().done(mView::loadFinish).fail(mView::loadError);
     }
 
+//    @Override
+//    public void addAppFromDisk(Intent data) {
+//        VUiKit.defer().when(() -> {
+//            try {
+//                Uri uri = data.getData();
+//                InputStream inputStream = mActivity.getContentResolver().openInputStream(uri);
+//                Source source = Okio.source(inputStream);
+//                BufferedSource buffer = Okio.buffer(source);
+//                String s = mActivity.getCacheDir().getPath() + "/test.apk";
+//                BufferedSink buffer1 = Okio.buffer(Okio.sink(new File(s)));
+//                buffer1.writeAll(buffer);
+//                buffer1.flush();
+//                buffer1.close();
+//                buffer.close();
+//                InstallResult installResult = VirtualCore.get().installPackage(s, 0);
+//                File file = new File(s);
+//                boolean exists = file.exists();
+//                Log.e("install " + exists, installResult.toString());
+//                new File(s).delete();
+//            } catch (FileNotFoundException e) {
+//                e.printStackTrace();
+//            } catch (IOException e) {
+//                e.printStackTrace();
+//            }
+//        }).then((res) -> {
+////
+//        }).done(res -> {
+//
+//        });
+//
+//    }
 
     @Override
     public void addApp(AppInfoLite info) {
@@ -102,7 +143,6 @@ class HomePresenterImpl implements HomeContract.HomePresenter {
                     }
                 }
                 addResult.userId = nextUserId;
-
                 if (VUserManager.get().getUserInfo(nextUserId) == null) {
                     // user not exist, create it automatically.
                     String nextUserName = "Space " + (nextUserId + 1);
@@ -117,6 +157,8 @@ class HomePresenterImpl implements HomeContract.HomePresenter {
                 }
             } else {
                 InstallResult res = mRepo.addVirtualApp(info);
+                new File(info.path).delete();
+                info.packageName = res.packageName;
                 if (!res.isSuccess) {
                     throw new IllegalStateException();
                 }
@@ -205,5 +247,6 @@ class HomePresenterImpl implements HomeContract.HomePresenter {
             VirtualCore.get().createShortcut(appData.userId, appData.appInfo.packageName, listener);
         }
     }
+
 
 }

@@ -83,6 +83,13 @@ public class CloneAppListAdapter extends DragSelectRecyclerViewAdapter<CloneAppL
             holder.labelView.setVisibility(View.INVISIBLE);
         }
 
+        if (info.type==1){
+            holder.iconView.setAlpha(0.65f);
+            holder.appCheckView.setVisibility(View.INVISIBLE);
+        }else{
+            holder.appCheckView.setVisibility(View.VISIBLE);
+        }
+
         holder.itemView.setOnClickListener(v -> {
             mItemEventListener.onItemClick(info, position);
         });

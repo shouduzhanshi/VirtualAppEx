@@ -28,4 +28,5 @@
     <string name="settings">设置</string>
     <string name="please_select_an_user">请选择用户</string>
     <string name="the_coming">即将到来</string>
+    <string name="add_from_disk">从磁盘安装</string>
 </resources>

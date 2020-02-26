@@ -1,6 +1,8 @@
 package io.virtualapp.home;
 
 
+import android.content.Intent;
+
 import java.util.List;
 
 import io.virtualapp.abs.BasePresenter;
@@ -38,7 +40,8 @@ import io.virtualapp.home.models.AppInfoLite;
 		void askInstallGms();
 	}
 
-	/* package */ interface HomePresenter extends BasePresenter {
+	/* package */
+    interface HomePresenter extends BasePresenter {
 
 		void launchApp(AppData data);
 
@@ -49,6 +52,8 @@ import io.virtualapp.home.models.AppInfoLite;
 		void deleteApp(AppData data);
 
         void createShortcut(AppData data);
+
+//        void addAppFromDisk(Intent data);
     }
 
 }

@@ -14,10 +14,19 @@ public class AddAppButton implements AppData {
     private String name;
     private Drawable icon;
 
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public void setIcon(Drawable icon) {
+        this.icon = icon;
+    }
+
     public AddAppButton(Context context) {
         name = context.getResources().getString(R.string.add_app);
         icon = context.getResources().getDrawable(R.drawable.ic_add_circle);
     }
+
 
     @Override
     public boolean isLoading() {

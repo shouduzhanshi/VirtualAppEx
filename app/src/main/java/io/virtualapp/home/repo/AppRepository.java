@@ -85,7 +85,8 @@ public class AppRepository implements AppDataSource {
 
     @Override
     public Promise<List<AppInfo>, Throwable, Void> getStorageApps(Context context, File rootDir) {
-        return VUiKit.defer().when(() -> convertPackageInfoToAppData(context, findAndParseAPKs(context, rootDir, SCAN_PATH_LIST), false));
+        Promise<List<AppInfo>, Throwable, Void> when = VUiKit.defer().when(() -> convertPackageInfoToAppData(context, findAndParseAPKs(context, rootDir, SCAN_PATH_LIST), false));
+        return when;
     }
 
     private List<PackageInfo> findAndParseAPKs(Context context, File rootDir, List<String> paths) {
