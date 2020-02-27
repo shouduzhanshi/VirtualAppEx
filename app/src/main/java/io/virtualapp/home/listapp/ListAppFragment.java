@@ -18,6 +18,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 
+import butterknife.BindView;
 import io.virtualapp.R;
 import io.virtualapp.VCommends;
 import io.virtualapp.abs.ui.VFragment;
@@ -33,9 +34,13 @@ import io.virtualapp.widgets.DragSelectRecyclerView;
  */
 public class ListAppFragment extends VFragment<ListAppPresenterImpl> implements ListAppContract.ListAppView {
     private static final String KEY_SELECT_FROM = "key_select_from";
-    private DragSelectRecyclerView mRecyclerView;
-    private ProgressBar mProgressBar;
-    private Button mInstallButton;
+
+    @BindView(R.id.select_app_recycler_view)
+    DragSelectRecyclerView mRecyclerView;
+    @BindView(R.id.select_app_progress_bar)
+    ProgressBar mProgressBar;
+    @BindView(R.id.select_app_install_btn)
+     Button mInstallButton;
     private CloneAppListAdapter mAdapter;
 
     public static ListAppFragment newInstance(File selectFrom) {
@@ -67,9 +72,6 @@ public class ListAppFragment extends VFragment<ListAppPresenterImpl> implements 
 
     @Override
     public void initView(View view) {
-        mRecyclerView = (DragSelectRecyclerView) view.findViewById(R.id.select_app_recycler_view);
-        mProgressBar = (ProgressBar) view.findViewById(R.id.select_app_progress_bar);
-        mInstallButton = (Button) view.findViewById(R.id.select_app_install_btn);
         mRecyclerView.setLayoutManager(new StaggeredGridLayoutManager(3, OrientationHelper.VERTICAL));
         mRecyclerView.addItemDecoration(new ItemOffsetDecoration(VUiKit.dpToPx(getContext(), 2)));
         mAdapter = new CloneAppListAdapter(getActivity());
@@ -116,7 +118,7 @@ public class ListAppFragment extends VFragment<ListAppPresenterImpl> implements 
 
     @Override
     protected void setPresenterParm(ListAppPresenterImpl mPresenter) {
-       mPresenter.setParm(getActivity(), this, getSelectFrom());
+        mPresenter.setParm(getActivity(), this, getSelectFrom());
     }
 
     @Override

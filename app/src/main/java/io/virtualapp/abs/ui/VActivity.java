@@ -16,6 +16,7 @@ import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 
 //import butterknife.ButterKnife;
+import butterknife.ButterKnife;
 import io.virtualapp.abs.BasePresenter;
 import io.virtualapp.abs.BaseView;
 
@@ -81,14 +82,13 @@ public abstract class VActivity<P extends BasePresenter> extends AppCompatActivi
                         setPresenterParm(mPresenter);
                         mPresenter.onCreate();
                     }
-
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
             }
         });
         setContentView(view);
-//        ButterKnife.bind(view);
+        ButterKnife.bind(this);
     }
 
     protected  void setPresenterParm(P mPresenter){

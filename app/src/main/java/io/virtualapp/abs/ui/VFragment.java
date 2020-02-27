@@ -14,7 +14,7 @@ import android.view.ViewTreeObserver;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 
-//import butterknife.ButterKnife;
+import butterknife.ButterKnife;
 import io.virtualapp.abs.BasePresenter;
 
 /**
@@ -126,7 +126,7 @@ public abstract class VFragment<T extends BasePresenter> extends Fragment {
                 }
             }
         });
-//        ButterKnife.bind(view);
+        ButterKnife.bind(this,view);
         return view;
     }
 

@@ -11,6 +11,9 @@ import android.widget.TextView;
 
 import java.util.List;
 
+import butterknife.BindView;
+import butterknife.BindViews;
+import butterknife.ButterKnife;
 import io.virtualapp.R;
 import io.virtualapp.abs.ui.VUiKit;
 import io.virtualapp.home.models.AppInfo;
@@ -130,18 +133,19 @@ public class CloneAppListAdapter extends DragSelectRecyclerViewAdapter<CloneAppL
     }
 
     class ViewHolder extends RecyclerView.ViewHolder {
-        private ImageView iconView;
-        private TextView nameView;
-        private ImageView appCheckView;
-        private LabelView labelView;
+        @BindView(R.id.item_app_icon)
+         ImageView iconView;
+        @BindView(R.id.item_app_name)
+         TextView nameView;
+        @BindView(R.id.item_app_checked)
+         ImageView appCheckView;
+        @BindView(R.id.item_app_clone_count)
+         LabelView labelView;
 
         ViewHolder(View itemView) {
             super(itemView);
             if (itemView != mFooterView) {
-                iconView = (ImageView) itemView.findViewById(R.id.item_app_icon);
-                nameView = (TextView) itemView.findViewById(R.id.item_app_name);
-                appCheckView = (ImageView) itemView.findViewById(R.id.item_app_checked);
-                labelView = (LabelView) itemView.findViewById(R.id.item_app_clone_count);
+                ButterKnife.bind(this,itemView);
             }
         }
     }

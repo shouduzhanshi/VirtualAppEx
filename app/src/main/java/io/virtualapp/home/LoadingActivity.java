@@ -12,6 +12,7 @@ import com.lody.virtual.client.ipc.VActivityManager;
 
 import java.util.Locale;
 
+import butterknife.BindView;
 import io.virtualapp.R;
 import io.virtualapp.abs.ui.VActivity;
 import io.virtualapp.abs.ui.VUiKit;
@@ -28,8 +29,14 @@ public class LoadingActivity extends VActivity {
     private static final String PKG_NAME_ARGUMENT = "MODEL_ARGUMENT";
     private static final String KEY_INTENT = "KEY_INTENT";
     private static final String KEY_USER = "KEY_USER";
+
     private PackageAppData appModel;
-    private EatBeansView loadingView;
+    @BindView(R.id.loading_anim)
+    EatBeansView loadingView;
+    @BindView(R.id.app_icon)
+     ImageView iconView;
+    @BindView(R.id.app_name)
+     TextView nameView;
 
     public static void launch(Context context, String packageName, int userId) {
         Intent intent = VirtualCore.get().getLaunchIntent(packageName, userId);
@@ -50,13 +57,10 @@ public class LoadingActivity extends VActivity {
 
     @Override
     public void initView(Bundle savedInstanceState) {
-        loadingView = (EatBeansView) findViewById(R.id.loading_anim);
         int userId = getIntent().getIntExtra(KEY_USER, -1);
         String pkg = getIntent().getStringExtra(PKG_NAME_ARGUMENT);
         appModel = PackageAppDataStorage.get().acquire(pkg);
-        ImageView iconView = (ImageView) findViewById(R.id.app_icon);
         iconView.setImageDrawable(appModel.icon);
-        TextView nameView = (TextView) findViewById(R.id.app_name);
         nameView.setText(String.format(Locale.ENGLISH, "Opening %s...", appModel.name));
         Intent intent = getIntent().getParcelableExtra(KEY_INTENT);
         if (intent == null) {

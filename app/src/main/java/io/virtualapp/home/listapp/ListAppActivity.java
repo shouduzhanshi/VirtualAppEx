@@ -32,6 +32,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
 
+import butterknife.BindView;
 import io.virtualapp.R;
 import io.virtualapp.VCommends;
 import io.virtualapp.abs.ui.VActivity;
@@ -51,7 +52,8 @@ import okio.Source;
  */
 public class ListAppActivity extends VActivity {
 
-    private Toolbar mToolBar;
+    @BindView(R.id.clone_app_tool_bar)
+     Toolbar mToolBar;
 
     public static void gotoListApp(Activity activity) {
         Intent intent = new Intent(activity, ListAppActivity.class);
@@ -71,8 +73,6 @@ public class ListAppActivity extends VActivity {
 
     @Override
     public void initView(Bundle savedInstanceState) {
-
-        mToolBar = (Toolbar) findViewById(R.id.clone_app_tool_bar);
 //        mTabLayout = (TabLayout) mToolBar.findViewById(R.id.clone_app_tab_layout);
 //        mViewPager = (ViewPager) findViewById(R.id.clone_app_view_pager);
         setupToolBar();

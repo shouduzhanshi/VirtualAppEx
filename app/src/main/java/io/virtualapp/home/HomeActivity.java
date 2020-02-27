@@ -35,6 +35,8 @@ import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.List;
 
+import butterknife.BindView;
+import butterknife.ButterKnife;
 import io.virtualapp.R;
 import io.virtualapp.VCommends;
 import io.virtualapp.abs.nestedadapter.SmartRecyclerAdapter;
@@ -60,21 +62,40 @@ import static android.support.v7.widget.helper.ItemTouchHelper.RIGHT;
 import static android.support.v7.widget.helper.ItemTouchHelper.START;
 import static android.support.v7.widget.helper.ItemTouchHelper.UP;
 
+
 /**
  * @author Lody
  */
 public class HomeActivity extends VActivity<HomePresenterImpl> implements HomeContract.HomeView {
 
-    private TwoGearsView mLoadingView;
-    private RecyclerView mLauncherView;
-    private View mMenuView;
+    @BindView(R.id.pb_loading_app)
+    TwoGearsView mLoadingView;
+
+    @BindView(R.id.home_launcher)
+     RecyclerView mLauncherView;
+
+    @BindView(R.id.home_menu)
+     View mMenuView;
+
     private PopupMenu mPopupMenu;
-    private View mBottomArea;
-    private View mCreateShortcutBox;
-    private TextView mCreateShortcutTextView;
-    private View mDeleteAppBox;
-    private TextView mDeleteAppTextView;
+
+    @BindView(R.id.bottom_area)
+     View mBottomArea;
+
+    @BindView(R.id.create_shortcut_area)
+     View mCreateShortcutBox;
+
+    @BindView(R.id.create_shortcut_text)
+     TextView mCreateShortcutTextView;
+
+    @BindView(R.id.delete_app_area)
+     View mDeleteAppBox;
+
+    @BindView(R.id.delete_app_text)
+     TextView mDeleteAppTextView;
+
     private LaunchpadAdapter mLaunchpadAdapter;
+
     private Handler mUiHandler;
 
 
@@ -93,14 +114,13 @@ public class HomeActivity extends VActivity<HomePresenterImpl> implements HomeCo
     @Override
     public void initView(Bundle savedInstanceState) {
         mUiHandler = new Handler(Looper.getMainLooper());
-        bindViews();
         initLaunchpad();
         initMenu();
     }
 
     @Override
     protected void setPresenterParm(HomePresenterImpl mPresenter) {
-        mPresenter.setParm((HomeContract.HomeView) this);
+        mPresenter.setParm(this);
     }
 
     private void initMenu() {
@@ -155,17 +175,6 @@ public class HomeActivity extends VActivity<HomePresenterImpl> implements HomeCo
         } catch (Exception e) {
             e.printStackTrace();
         }
-    }
-
-    private void bindViews() {
-        mLoadingView = (TwoGearsView) findViewById(R.id.pb_loading_app);
-        mLauncherView = (RecyclerView) findViewById(R.id.home_launcher);
-        mMenuView = findViewById(R.id.home_menu);
-        mBottomArea = findViewById(R.id.bottom_area);
-        mCreateShortcutBox = findViewById(R.id.create_shortcut_area);
-        mCreateShortcutTextView = (TextView) findViewById(R.id.create_shortcut_text);
-        mDeleteAppBox = findViewById(R.id.delete_app_area);
-        mDeleteAppTextView = (TextView) findViewById(R.id.delete_app_text);
     }
 
     private void initLaunchpad() {

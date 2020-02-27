@@ -34,18 +34,25 @@ import com.tencent.tencentmap.mapsdk.map.CameraUpdateFactory;
 import com.tencent.tencentmap.mapsdk.map.MapView;
 import com.tencent.tencentmap.mapsdk.map.TencentMap;
 
+import butterknife.BindView;
 import io.virtualapp.abs.ui.VActivity;
 import io.virtualapp.R;
 
 public class MarkerActivity extends VActivity implements TencentMap.OnMapClickListener, TencentLocationListener {
     private TencentMap mMap;
-    private MapView mapView;
+    @BindView(R.id.map)
+     MapView mapView;
     private LatLng mLatLng = new LatLng(39.9182645956, 116.3970032689);
-    private TextView pathText;
+
+    @BindView(R.id.address)
+     TextView pathText;
     private TencentSearch geocoderSearch;
     private String mAddress;
     private boolean isNoPoint = true;
     private VLocation mVLocation;
+
+    @BindView(R.id.task_top_toolbar)
+     Toolbar toolbar;
 
     @Override
     public int setViewRes() {
@@ -55,13 +62,10 @@ public class MarkerActivity extends VActivity implements TencentMap.OnMapClickLi
     @Override
     public void initView(Bundle savedInstanceState) {
         setResult(Activity.RESULT_CANCELED);
-        Toolbar toolbar = bind(R.id.task_top_toolbar);
         setSupportActionBar(toolbar);
         //地址显示，暂时不用
-        pathText = bind(R.id.address);
         pathText.setVisibility(View.VISIBLE);
         enableBackHome();
-        mapView = (MapView) findViewById(R.id.map);
         mapView.onCreate(savedInstanceState); // 此方法必须重写
         mMap = mapView.getMap();
         mMap.setOnMapClickListener(this);
@@ -88,10 +92,6 @@ public class MarkerActivity extends VActivity implements TencentMap.OnMapClickLi
 
     }
 
-    @SuppressWarnings("unchecked")
-    protected <T extends View> T bind(int id) {
-        return (T) findViewById(id);
-    }
 
     public void enableBackHome() {
         ActionBar actionBar = getSupportActionBar();
@@ -252,8 +252,6 @@ public class MarkerActivity extends VActivity implements TencentMap.OnMapClickLi
         super.onDestroy();
         mapView.onDestroy();
     }
-
-
 
 
     private void setResultOk(VLocation location) {
