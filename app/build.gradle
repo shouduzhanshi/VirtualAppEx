@@ -79,6 +79,8 @@ dependencies {
 
     implementation 'com.jakewharton:butterknife:8.8.1'
     annotationProcessor 'com.jakewharton:butterknife-compiler:8.8.1'
+
+    debugImplementation 'com.squareup.leakcanary:leakcanary-android:2.2'
 //
-//    implementation 'com.github.CymChad:BaseRecyclerViewAdapterHelp`   er:2.9.46'
+//    implementation 'com.github.CymChad:BaseRecyclerViewAdapterHelper:2.9.46'
 }

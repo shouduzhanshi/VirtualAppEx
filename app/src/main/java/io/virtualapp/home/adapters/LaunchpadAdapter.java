@@ -34,12 +34,13 @@ public class LaunchpadAdapter extends RecyclerView.Adapter<LaunchpadAdapter.View
     public void add(AppData model) {
         int insertPos = mList.size() - 1;
         mList.add(insertPos, model);
-        notifyItemInserted(insertPos);
+        notifyDataSetChanged();
     }
 
     public void replace(int index, AppData data) {
         mList.set(index, data);
         notifyItemChanged(index);
+//        notifyDataSetChanged();
     }
 
     public void remove(AppData data) {

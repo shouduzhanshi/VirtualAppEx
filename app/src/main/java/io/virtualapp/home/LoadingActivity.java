@@ -1,5 +1,6 @@
 package io.virtualapp.home;
 
+import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
@@ -27,16 +28,18 @@ import io.virtualapp.widgets.EatBeansView;
 public class LoadingActivity extends VActivity {
 
     private static final String PKG_NAME_ARGUMENT = "MODEL_ARGUMENT";
+
     private static final String KEY_INTENT = "KEY_INTENT";
+
     private static final String KEY_USER = "KEY_USER";
 
     private PackageAppData appModel;
     @BindView(R.id.loading_anim)
     EatBeansView loadingView;
     @BindView(R.id.app_icon)
-     ImageView iconView;
+    ImageView iconView;
     @BindView(R.id.app_name)
-     TextView nameView;
+    TextView nameView;
 
     public static void launch(Context context, String packageName, int userId) {
         Intent intent = VirtualCore.get().getLaunchIntent(packageName, userId);
@@ -79,13 +82,21 @@ public class LoadingActivity extends VActivity {
         });
     }
 
-    private final VirtualCore.UiCallback mUiCallback = new VirtualCore.UiCallback() {
+    VirtualCore.UiCallback mUiCallback = new VirtualCore.UiCallback() {
+        Activity activity = getActivity();
 
         @Override
         public void onAppOpened(String packageName, int userId) throws RemoteException {
-            finish();
+            activity.finish();
+            activity = null;
         }
     };
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        mUiCallback = null;
+    }
 
     @Override
     protected void onResume() {

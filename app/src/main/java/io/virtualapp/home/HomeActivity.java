@@ -194,6 +194,7 @@ public class HomeActivity extends VActivity<HomePresenterImpl> implements HomeCo
             if (!data.isLoading()) {
                 if (data instanceof AddAppButton) {
                     onAddAppButtonClick();
+                    return;
                 }
                 mLaunchpadAdapter.notifyItemChanged(pos);
                 mPresenter.launchApp(data);
@@ -424,7 +425,7 @@ public class HomeActivity extends VActivity<HomePresenterImpl> implements HomeCo
                 AppData data = mLaunchpadAdapter.getList().get(target.getAdapterPosition());
                 return data.canReorder();
             } catch (IndexOutOfBoundsException e) {
-                e.printStackTrace();
+//                e.printStackTrace();
             }
             return false;
         }
