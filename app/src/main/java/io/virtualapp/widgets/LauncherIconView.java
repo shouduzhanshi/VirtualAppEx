@@ -144,7 +144,7 @@ public class LauncherIconView extends AppCompatImageView implements ShimmerViewB
         canvas.drawCircle(mWidth / 2f, mHeight / 2f, mRadius, mPaint);
         mPaint.setXfermode(null);
 
-        //start angle : -90 ~ 270;sweep Angle : 360 ~ 0;
+        //onCreate angle : -90 ~ 270;sweep Angle : 360 ~ 0;
         canvas.drawArc(mProgressOval, -90 + mProgress * 3.6f, 360 - mProgress * 3.6f, true, mPaint);
     }
 

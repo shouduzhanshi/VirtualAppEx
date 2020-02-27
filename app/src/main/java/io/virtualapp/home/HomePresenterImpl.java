@@ -27,31 +27,27 @@ import io.virtualapp.home.models.PackageAppData;
 import io.virtualapp.home.repo.AppRepository;
 import io.virtualapp.home.repo.PackageAppDataStorage;
 import jonathanfinerty.once.Once;
-import okio.BufferedSink;
-import okio.BufferedSource;
-import okio.Okio;
-import okio.Source;
 
 /**
  * @author Lody
  */
-class HomePresenterImpl implements HomeContract.HomePresenter {
+public class HomePresenterImpl implements HomeContract.HomePresenter {
 
     private HomeContract.HomeView mView;
     private Activity mActivity;
     private AppRepository mRepo;
-    private AppData mTempAppData;
 
 
-    HomePresenterImpl(HomeContract.HomeView view) {
+    public void setParm(HomeContract.HomeView view) {
         mView = view;
         mActivity = view.getActivity();
         mRepo = new AppRepository(mActivity);
-        mView.setPresenter(this);
     }
 
+
+
     @Override
-    public void start() {
+    public void onCreate() {
         dataChanged();
         if (!Once.beenDone(VCommends.TAG_SHOW_ADD_APP_GUIDE)) {
             mView.showGuide();
@@ -61,6 +57,21 @@ class HomePresenterImpl implements HomeContract.HomePresenter {
             mView.askInstallGms();
             Once.markDone(VCommends.TAG_ASK_INSTALL_GMS);
         }
+    }
+
+    @Override
+    public void onResume() {
+
+    }
+
+    @Override
+    public void onPause() {
+
+    }
+
+    @Override
+    public void onDestroy() {
+
     }
 
     @Override
@@ -85,38 +96,6 @@ class HomePresenterImpl implements HomeContract.HomePresenter {
         mView.showLoading();
         mRepo.getVirtualApps().done(mView::loadFinish).fail(mView::loadError);
     }
-
-//    @Override
-//    public void addAppFromDisk(Intent data) {
-//        VUiKit.defer().when(() -> {
-//            try {
-//                Uri uri = data.getData();
-//                InputStream inputStream = mActivity.getContentResolver().openInputStream(uri);
-//                Source source = Okio.source(inputStream);
-//                BufferedSource buffer = Okio.buffer(source);
-//                String s = mActivity.getCacheDir().getPath() + "/test.apk";
-//                BufferedSink buffer1 = Okio.buffer(Okio.sink(new File(s)));
-//                buffer1.writeAll(buffer);
-//                buffer1.flush();
-//                buffer1.close();
-//                buffer.close();
-//                InstallResult installResult = VirtualCore.get().installPackage(s, 0);
-//                File file = new File(s);
-//                boolean exists = file.exists();
-//                Log.e("install " + exists, installResult.toString());
-//                new File(s).delete();
-//            } catch (FileNotFoundException e) {
-//                e.printStackTrace();
-//            } catch (IOException e) {
-//                e.printStackTrace();
-//            }
-//        }).then((res) -> {
-////
-//        }).done(res -> {
-//
-//        });
-//
-//    }
 
     @Override
     public void addApp(AppInfoLite info) {

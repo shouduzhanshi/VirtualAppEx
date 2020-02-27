@@ -44,9 +44,12 @@ public class LoadingActivity extends VActivity {
     }
 
     @Override
-    protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_loading);
+    public int setViewRes() {
+        return R.layout.activity_loading;
+    }
+
+    @Override
+    public void initView(Bundle savedInstanceState) {
         loadingView = (EatBeansView) findViewById(R.id.loading_anim);
         int userId = getIntent().getIntExtra(KEY_USER, -1);
         String pkg = getIntent().getStringExtra(PKG_NAME_ARGUMENT);
@@ -70,7 +73,6 @@ public class LoadingActivity extends VActivity {
             }
             VActivityManager.get().startActivity(intent, userId);
         });
-
     }
 
     private final VirtualCore.UiCallback mUiCallback = new VirtualCore.UiCallback() {
@@ -92,4 +94,6 @@ public class LoadingActivity extends VActivity {
         super.onPause();
         loadingView.stopAnim();
     }
+
+
 }

@@ -203,7 +203,7 @@ public class LoadingIndicatorView extends View {
     }
 
     public void show() {
-        // Reset the start time.
+        // Reset the onCreate time.
         mStartTime = -1;
         mDismissed = false;
         removeCallbacks(mDelayedHide);

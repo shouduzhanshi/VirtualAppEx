@@ -23,7 +23,6 @@ public class SplashActivity extends VActivity {
         getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN,
                 WindowManager.LayoutParams.FLAG_FULLSCREEN);
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_splash);
         VUiKit.defer().when(() -> {
             if (!Once.beenDone("collect_flurry")) {
                 FlurryROMCollector.startCollect();
@@ -40,6 +39,16 @@ public class SplashActivity extends VActivity {
             HomeActivity.goHome(this);
             finish();
         });
+    }
+
+    @Override
+    public int setViewRes() {
+        return R.layout.activity_splash;
+    }
+
+    @Override
+    public void initView(Bundle savedInstanceState) {
+
     }
 
 

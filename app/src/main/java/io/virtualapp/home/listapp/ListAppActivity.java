@@ -52,8 +52,6 @@ import okio.Source;
 public class ListAppActivity extends VActivity {
 
     private Toolbar mToolBar;
-//    private TabLayout mTabLayout;
-//    private ViewPager mViewPager;
 
     public static void gotoListApp(Activity activity) {
         Intent intent = new Intent(activity, ListAppActivity.class);
@@ -64,7 +62,16 @@ public class ListAppActivity extends VActivity {
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         getWindow().setBackgroundDrawable(new ColorDrawable(getResources().getColor(R.color.colorPrimaryDark)));
-        setContentView(R.layout.activity_clone_app);
+    }
+
+    @Override
+    public int setViewRes() {
+        return R.layout.activity_clone_app;
+    }
+
+    @Override
+    public void initView(Bundle savedInstanceState) {
+
         mToolBar = (Toolbar) findViewById(R.id.clone_app_tool_bar);
 //        mTabLayout = (TabLayout) mToolBar.findViewById(R.id.clone_app_tab_layout);
 //        mViewPager = (ViewPager) findViewById(R.id.clone_app_view_pager);

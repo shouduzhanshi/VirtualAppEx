@@ -48,9 +48,12 @@ public class MarkerActivity extends VActivity implements TencentMap.OnMapClickLi
     private VLocation mVLocation;
 
     @Override
-    protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_marker);
+    public int setViewRes() {
+        return R.layout.activity_marker;
+    }
+
+    @Override
+    public void initView(Bundle savedInstanceState) {
         setResult(Activity.RESULT_CANCELED);
         Toolbar toolbar = bind(R.id.task_top_toolbar);
         setSupportActionBar(toolbar);
@@ -72,12 +75,17 @@ public class MarkerActivity extends VActivity implements TencentMap.OnMapClickLi
                 isNoPoint = false;
             }
         }
-
         if (isNoPoint) {
             startLocation();
         } else {
             onMapClick(mLatLng);
         }
+    }
+
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+
     }
 
     @SuppressWarnings("unchecked")
@@ -93,7 +101,7 @@ public class MarkerActivity extends VActivity implements TencentMap.OnMapClickLi
     }
 
     private void startLocation() {
-        Toast.makeText(this, "start location", Toast.LENGTH_SHORT).show();
+        Toast.makeText(this, "onCreate location", Toast.LENGTH_SHORT).show();
         TencentLocationRequest request = TencentLocationRequest.create()
                 .setRequestLevel(TencentLocationRequest.REQUEST_LEVEL_GEO)
                 .setAllowGPS(true);
@@ -244,6 +252,8 @@ public class MarkerActivity extends VActivity implements TencentMap.OnMapClickLi
         super.onDestroy();
         mapView.onDestroy();
     }
+
+
 
 
     private void setResultOk(VLocation location) {

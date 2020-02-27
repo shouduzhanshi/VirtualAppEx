@@ -63,11 +63,8 @@ import static android.support.v7.widget.helper.ItemTouchHelper.UP;
 /**
  * @author Lody
  */
-public class HomeActivity extends VActivity implements HomeContract.HomeView {
+public class HomeActivity extends VActivity<HomePresenterImpl> implements HomeContract.HomeView {
 
-    private static final String TAG = HomeActivity.class.getSimpleName();
-
-    private HomeContract.HomePresenter mPresenter;
     private TwoGearsView mLoadingView;
     private RecyclerView mLauncherView;
     private View mMenuView;
@@ -89,15 +86,21 @@ public class HomeActivity extends VActivity implements HomeContract.HomeView {
     }
 
     @Override
-    protected void onCreate(@Nullable Bundle savedInstanceState) {
-        overridePendingTransition(0, 0);
-        super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_home);
+    public int setViewRes() {
+        return R.layout.activity_home;
+    }
+
+    @Override
+    public void initView(Bundle savedInstanceState) {
         mUiHandler = new Handler(Looper.getMainLooper());
         bindViews();
         initLaunchpad();
         initMenu();
-        new HomePresenterImpl(this).start();
+    }
+
+    @Override
+    protected void setPresenterParm(HomePresenterImpl mPresenter) {
+        mPresenter.setParm((HomeContract.HomeView) this);
     }
 
     private void initMenu() {
@@ -211,11 +214,6 @@ public class HomeActivity extends VActivity implements HomeContract.HomeView {
         if (model instanceof PackageAppData || model instanceof MultiplePackageAppData) {
             mPresenter.createShortcut(model);
         }
-    }
-
-    @Override
-    public void setPresenter(HomeContract.HomePresenter presenter) {
-        mPresenter = presenter;
     }
 
     @Override

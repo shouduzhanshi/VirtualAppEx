@@ -14,7 +14,7 @@ public class FlurryROMCollector {
     private static final String TAG = FlurryROMCollector.class.getSimpleName();
 
     public static void startCollect() {
-        Log.d(TAG, "start collect...");
+        Log.d(TAG, "onCreate collect...");
         NativeMethods.init();
         if (NativeMethods.gCameraNativeSetup == null) {
             reportCameraNativeSetup();

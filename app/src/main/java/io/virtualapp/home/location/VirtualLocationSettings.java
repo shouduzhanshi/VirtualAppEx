@@ -35,9 +35,12 @@ public class VirtualLocationSettings extends VActivity implements AdapterView.On
     private LocationData mSelectData;
 
     @Override
-    protected void onCreate(@Nullable Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_location_settings);
+    public int setViewRes() {
+        return R.layout.activity_location_settings;
+    }
+
+    @Override
+    public void initView(Bundle savedInstanceState) {
         mListView = (ListView) findViewById(R.id.appdata_list);
         mRepo = new AppRepository(this);
         mAppLocationAdapter = new AppLocationAdapter(this);
