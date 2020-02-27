@@ -20,7 +20,7 @@ import io.virtualapp.widgets.LauncherIconView;
 /**
  * @author Lody
  */
-public class LaunchpadAdapter extends RecyclerView.Adapter<LaunchpadAdapter.ViewHolder> {
+public class LaunchpadAdapter extends RecyclerView.Adapter<LaunchpadAdapter.ViewHolder> implements View.OnClickListener {
 
     private LayoutInflater mInflater;
     private List<AppData> mList;
@@ -64,12 +64,9 @@ public class LaunchpadAdapter extends RecyclerView.Adapter<LaunchpadAdapter.View
         } else {
             holder.firstOpenDot.setVisibility(View.INVISIBLE);
         }
+        holder.itemView.setTag(position);
         holder.itemView.setBackgroundColor(holder.color);
-        holder.itemView.setOnClickListener(v -> {
-            if (mAppClickListener != null) {
-                mAppClickListener.onAppClick(position, data);
-            }
-        });
+        holder.itemView.setOnClickListener(this);
         if (data instanceof MultiplePackageAppData) {
             MultiplePackageAppData multipleData = (MultiplePackageAppData) data;
             holder.spaceLabelView.setVisibility(View.VISIBLE);
@@ -159,6 +156,18 @@ public class LaunchpadAdapter extends RecyclerView.Adapter<LaunchpadAdapter.View
         int index = mList.indexOf(model);
         if (index >= 0) {
             notifyItemChanged(index);
+        }
+    }
+
+    @Override
+    public void onClick(View view) {
+        Object tag = view.getTag();
+        if (tag instanceof Integer) {
+            int position = (int) tag;
+            if (mAppClickListener != null) {
+                AppData appData = mList.get(position);
+                mAppClickListener.onAppClick(position, appData);
+            }
         }
     }
 

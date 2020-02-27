@@ -23,7 +23,7 @@ import io.virtualapp.widgets.LabelView;
 /**
  * @author Lody
  */
-public class CloneAppListAdapter extends DragSelectRecyclerViewAdapter<CloneAppListAdapter.ViewHolder> {
+public class CloneAppListAdapter extends DragSelectRecyclerViewAdapter<CloneAppListAdapter.ViewHolder> implements View.OnClickListener {
 
     private static final int TYPE_FOOTER = -2;
     private final View mFooterView;
@@ -69,6 +69,7 @@ public class CloneAppListAdapter extends DragSelectRecyclerViewAdapter<CloneAppL
             return;
         }
         super.onBindViewHolder(holder, position);
+        holder.itemView.setTag(position);
         AppInfo info = mAppList.get(position);
         holder.iconView.setImageDrawable(info.icon);
         holder.nameView.setText(info.name);
@@ -85,17 +86,13 @@ public class CloneAppListAdapter extends DragSelectRecyclerViewAdapter<CloneAppL
         } else {
             holder.labelView.setVisibility(View.INVISIBLE);
         }
-
-        if (info.type==1){
+        if (info.type == 1) {
             holder.iconView.setAlpha(0.65f);
             holder.appCheckView.setVisibility(View.INVISIBLE);
-        }else{
+        } else {
             holder.appCheckView.setVisibility(View.VISIBLE);
         }
-
-        holder.itemView.setOnClickListener(v -> {
-            mItemEventListener.onItemClick(info, position);
-        });
+        holder.itemView.setOnClickListener(this);
     }
 
     @Override
@@ -125,6 +122,18 @@ public class CloneAppListAdapter extends DragSelectRecyclerViewAdapter<CloneAppL
         return mAppList.get(index);
     }
 
+    @Override
+    public void onClick(View view) {
+        Object tag = view.getTag();
+        if (tag instanceof Integer){
+            int tag1 = (int) tag;
+            AppInfo info = mAppList.get(tag1);
+            mItemEventListener.onItemClick(info, tag1);
+        }
+
+
+    }
+
     public interface ItemEventListener {
 
         void onItemClick(AppInfo appData, int position);
@@ -134,18 +143,18 @@ public class CloneAppListAdapter extends DragSelectRecyclerViewAdapter<CloneAppL
 
     class ViewHolder extends RecyclerView.ViewHolder {
         @BindView(R.id.item_app_icon)
-         ImageView iconView;
+        ImageView iconView;
         @BindView(R.id.item_app_name)
-         TextView nameView;
+        TextView nameView;
         @BindView(R.id.item_app_checked)
-         ImageView appCheckView;
+        ImageView appCheckView;
         @BindView(R.id.item_app_clone_count)
-         LabelView labelView;
+        LabelView labelView;
 
         ViewHolder(View itemView) {
             super(itemView);
             if (itemView != mFooterView) {
-                ButterKnife.bind(this,itemView);
+                ButterKnife.bind(this, itemView);
             }
         }
     }
