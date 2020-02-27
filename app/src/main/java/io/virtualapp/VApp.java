@@ -5,10 +5,8 @@ import android.app.Application;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.os.Bundle;
-import android.support.multidex.MultiDexApplication;
 import android.util.Log;
 
-import com.flurry.android.FlurryAgent;
 import com.lody.virtual.client.core.VirtualCore;
 import com.lody.virtual.client.stub.VASettings;
 import com.yc.nonsdk.NonSdkManager;
@@ -22,7 +20,7 @@ import jonathanfinerty.once.Once;
 /**
  * @author Lody
  */
-public class VApp extends MultiDexApplication implements Application.ActivityLifecycleCallbacks {
+public class VApp extends Application implements Application.ActivityLifecycleCallbacks {
 
     private static VApp gApp;
     private SharedPreferences mPreferences;
@@ -55,12 +53,7 @@ public class VApp extends MultiDexApplication implements Application.ActivityLif
             @Override
             public void onMainProcess() {
                 Once.initialise(VApp.this);
-                new FlurryAgent.Builder()
-                        .withLogEnabled(true)
-                        .withListener(() -> {
-                            // nothing
-                        })
-                        .build(VApp.this, "48RJJP7ZCZZBB6KMMWW5");
+
             }
 
             @Override
