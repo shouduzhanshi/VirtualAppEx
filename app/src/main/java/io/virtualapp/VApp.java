@@ -11,11 +11,19 @@ import com.lody.virtual.client.core.VirtualCore;
 import com.lody.virtual.client.stub.VASettings;
 import com.yc.nonsdk.NonSdkManager;
 
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
+
+import java.util.ArrayList;
+import java.util.List;
+
+import dalvik.system.DexClassLoader;
 import io.virtualapp.delegate.MyAppRequestListener;
 import io.virtualapp.delegate.MyComponentDelegate;
 import io.virtualapp.delegate.MyPhoneInfoDelegate;
 import io.virtualapp.delegate.MyTaskDescriptionDelegate;
 import jonathanfinerty.once.Once;
+import timber.log.Timber;
 
 /**
  * @author Lody
@@ -23,10 +31,17 @@ import jonathanfinerty.once.Once;
 public class VApp extends Application implements Application.ActivityLifecycleCallbacks {
 
     private static VApp gApp;
+
     private SharedPreferences mPreferences;
 
     public static VApp getApp() {
         return gApp;
+    }
+
+    private static List<Activity> activitys = new ArrayList<>();
+
+    public static List<Activity> getActivitys() {
+        return activitys;
     }
 
     @Override
@@ -35,12 +50,53 @@ public class VApp extends Application implements Application.ActivityLifecycleCa
         mPreferences = base.getSharedPreferences("va", Context.MODE_MULTI_PROCESS);
         VASettings.ENABLE_IO_REDIRECT = true;
         VASettings.ENABLE_INNER_SHORTCUT = false;
+        initLog();
         NonSdkManager.getInstance().visibleAllApi();
         try {
             VirtualCore.get().startup(base);
         } catch (Throwable e) {
             e.printStackTrace();
         }
+
+    }
+
+    private void initLog() {
+        Timber.plant(new Timber.DebugTree() {
+            @Override
+            protected void log(int priority, String tag, String message, Throwable t) {
+                switch (priority) {
+                    case Log.DEBUG:
+                        if (t != null) {
+                            Log.d(tag, message);
+                        } else {
+                            Log.d(tag, message, t);
+                        }
+                        break;
+                    case Log.ERROR:
+                        if (t != null) {
+                            Log.e(tag, message);
+                        } else {
+                            Log.e(tag, message, t);
+                        }
+                        break;
+                    case Log.INFO:
+                        if (t != null) {
+                            Log.i(tag, message);
+                        } else {
+                            Log.i(tag, message, t);
+                        }
+                        break;
+                    case Log.WARN:
+                        if (t != null) {
+                            Log.w(tag, message);
+                        } else {
+                            Log.w(tag, message, t);
+                        }
+                        break;
+
+                }
+            }
+        });
     }
 
     @Override
@@ -49,11 +105,9 @@ public class VApp extends Application implements Application.ActivityLifecycleCa
         super.onCreate();
         VirtualCore virtualCore = VirtualCore.get();
         virtualCore.initialize(new VirtualCore.VirtualInitializer() {
-
             @Override
             public void onMainProcess() {
                 Once.initialise(VApp.this);
-
             }
 
             @Override
@@ -88,7 +142,8 @@ public class VApp extends Application implements Application.ActivityLifecycleCa
 
     @Override
     public void onActivityCreated(Activity activity, Bundle bundle) {
-        Log.e("App",activity.getLocalClassName());
+        Log.e("App", activity.getLocalClassName());
+        activitys.add(activity);
     }
 
     @Override
@@ -118,6 +173,6 @@ public class VApp extends Application implements Application.ActivityLifecycleCa
 
     @Override
     public void onActivityDestroyed(Activity activity) {
-
+        activitys.remove(activity);
     }
 }

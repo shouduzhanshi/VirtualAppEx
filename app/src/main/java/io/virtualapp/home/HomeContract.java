@@ -2,6 +2,7 @@ package io.virtualapp.home;
 
 
 import android.content.Intent;
+import android.graphics.drawable.Drawable;
 
 import java.util.List;
 
@@ -38,6 +39,11 @@ import io.virtualapp.home.models.AppInfoLite;
         void refreshLauncherItem(AppData model);
 
         void askInstallGms();
+
+        void showStartAppLoading(Drawable icon, String format);
+
+        void hideStartAppLoading();
+
     }
 
     /* package */

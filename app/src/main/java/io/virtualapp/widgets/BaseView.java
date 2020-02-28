@@ -12,6 +12,7 @@ import android.view.animation.LinearInterpolator;
 
 public abstract class BaseView extends View {
 
+    int animSpeed = 500;
 
     public ValueAnimator valueAnimator;
 
@@ -28,9 +29,13 @@ public abstract class BaseView extends View {
         InitPaint();
     }
 
+    public void setAnimSpeed(int animSpeed) {
+        this.animSpeed = animSpeed;
+    }
+
     public void startAnim() {
         stopAnim();
-        startViewAnim(0f, 1f, 500);
+        startViewAnim(0f, 1f, animSpeed);
     }
 
     public void startAnim(int time) {

@@ -3,15 +3,19 @@ package io.virtualapp.home;
 import android.animation.Animator;
 import android.animation.ObjectAnimator;
 import android.annotation.SuppressLint;
+import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Canvas;
 import android.graphics.Color;
+import android.graphics.drawable.ColorDrawable;
+import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
 import android.support.annotation.Nullable;
+import android.support.v4.widget.PopupWindowCompat;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.widget.OrientationHelper;
 import android.support.v7.widget.PopupMenu;
@@ -20,9 +24,13 @@ import android.support.v7.widget.StaggeredGridLayoutManager;
 import android.support.v7.widget.helper.ItemTouchHelper;
 import android.util.Log;
 import android.view.ContextThemeWrapper;
+import android.view.Gravity;
+import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageView;
+import android.widget.PopupWindow;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -34,10 +42,13 @@ import com.lody.virtual.os.VUserManager;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Timer;
+import java.util.TimerTask;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import io.virtualapp.R;
+import io.virtualapp.VApp;
 import io.virtualapp.VCommends;
 import io.virtualapp.abs.nestedadapter.SmartRecyclerAdapter;
 import io.virtualapp.abs.ui.VActivity;
@@ -52,7 +63,9 @@ import io.virtualapp.home.models.AppInfoLite;
 import io.virtualapp.home.models.EmptyAppData;
 import io.virtualapp.home.models.MultiplePackageAppData;
 import io.virtualapp.home.models.PackageAppData;
+import io.virtualapp.widgets.EatBeansView;
 import io.virtualapp.widgets.TwoGearsView;
+import timber.log.Timber;
 
 import static android.support.v7.widget.helper.ItemTouchHelper.ACTION_STATE_DRAG;
 import static android.support.v7.widget.helper.ItemTouchHelper.DOWN;
@@ -72,31 +85,37 @@ public class HomeActivity extends VActivity<HomePresenterImpl> implements HomeCo
     TwoGearsView mLoadingView;
 
     @BindView(R.id.home_launcher)
-     RecyclerView mLauncherView;
+    RecyclerView mLauncherView;
 
     @BindView(R.id.home_menu)
-     View mMenuView;
+    View mMenuView;
 
     private PopupMenu mPopupMenu;
 
     @BindView(R.id.bottom_area)
-     View mBottomArea;
+    View mBottomArea;
 
     @BindView(R.id.create_shortcut_area)
-     View mCreateShortcutBox;
+    View mCreateShortcutBox;
 
     @BindView(R.id.create_shortcut_text)
-     TextView mCreateShortcutTextView;
+    TextView mCreateShortcutTextView;
 
     @BindView(R.id.delete_app_area)
-     View mDeleteAppBox;
+    View mDeleteAppBox;
 
     @BindView(R.id.delete_app_text)
-     TextView mDeleteAppTextView;
+    TextView mDeleteAppTextView;
 
     private LaunchpadAdapter mLaunchpadAdapter;
 
     private Handler mUiHandler;
+    private AlertDialog.Builder builder;
+    private PopupWindow startAppLoading;
+    private EatBeansView loadingView;
+    private ImageView iconView;
+    private TextView nameView;
+    private View view;
 
 
     public static void goHome(Context context) {
@@ -340,6 +359,31 @@ public class HomeActivity extends VActivity<HomePresenterImpl> implements HomeCo
     }
 
     @Override
+    public void showStartAppLoading(Drawable icon, String format) {
+        Timber.e("showStartAppLoading");
+        if (startAppLoading == null) {
+            view = getLayoutInflater().inflate(R.layout.activity_loading, null, false);
+            startAppLoading = new PopupWindow(view, ViewGroup.LayoutParams.MATCH_PARENT,VUiKit.dpToPx(this, 128));
+            startAppLoading.setOutsideTouchable(false);
+            loadingView = (EatBeansView) view.findViewById(R.id.loading_anim);
+            loadingView.setAnimSpeed(1000);
+            iconView = (ImageView) view.findViewById(R.id.app_icon);
+            nameView = (TextView) view.findViewById(R.id.app_name);
+        }
+        loadingView.startAnim();
+        startAppLoading.showAtLocation(view, Gravity.BOTTOM, 0, 0);
+        iconView.setImageDrawable(icon);
+        nameView.setText(format);
+    }
+
+    @Override
+    public void hideStartAppLoading() {
+        Timber.e("hideStartAppLoading");
+        loadingView.stopAnim();
+        startAppLoading.dismiss();
+    }
+
+    @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
         if (resultCode == RESULT_OK && data != null) {
@@ -489,6 +533,36 @@ public class HomeActivity extends VActivity<HomePresenterImpl> implements HomeCo
                 upAtDeleteAppArea = false;
                 mDeleteAppTextView.setTextColor(Color.WHITE);
                 mCreateShortcutTextView.setTextColor(Color.WHITE);
+            }
+        }
+    }
+
+    @Override
+    public void onBackPressed() {
+        exitBy2click();
+    }
+
+    boolean isExit;
+
+    /**
+     * 双击退出程序
+     */
+    public void exitBy2click() {
+        Timer eExit = null;
+        if (isExit == false) {
+            isExit = true;
+            Toast.makeText(this, "再按一次退出程序", Toast.LENGTH_SHORT).show();
+            eExit = new Timer();
+            eExit.schedule(new TimerTask() {
+                @Override
+                public void run() {
+                    isExit = false;
+                }
+            }, 2000);
+        } else {
+            List<Activity> activities = VApp.getActivitys();
+            for (Activity temp : activities) {
+                temp.finish();
             }
         }
     }

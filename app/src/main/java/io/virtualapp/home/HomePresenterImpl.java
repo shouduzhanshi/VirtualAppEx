@@ -3,20 +3,22 @@ package io.virtualapp.home;
 import android.app.Activity;
 import android.content.Intent;
 import android.graphics.Bitmap;
-import android.net.Uri;
-import android.util.Log;
+import android.graphics.drawable.Drawable;
+import android.os.RemoteException;
 
 import com.lody.virtual.GmsSupport;
 import com.lody.virtual.client.core.VirtualCore;
+import com.lody.virtual.client.ipc.VActivityManager;
 import com.lody.virtual.os.VUserInfo;
 import com.lody.virtual.os.VUserManager;
 import com.lody.virtual.remote.InstallResult;
 import com.lody.virtual.remote.InstalledAppInfo;
 
+import org.jdeferred.DoneCallback;
+
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.io.InputStream;
+import java.util.Locale;
 
 import io.virtualapp.VCommends;
 import io.virtualapp.abs.ui.VUiKit;
@@ -27,6 +29,7 @@ import io.virtualapp.home.models.PackageAppData;
 import io.virtualapp.home.repo.AppRepository;
 import io.virtualapp.home.repo.PackageAppDataStorage;
 import jonathanfinerty.once.Once;
+import timber.log.Timber;
 
 /**
  * @author Lody
@@ -43,7 +46,6 @@ public class HomePresenterImpl implements HomeContract.HomePresenter {
         mActivity = view.getActivity();
         mRepo = new AppRepository(mActivity);
     }
-
 
 
     @Override
@@ -79,16 +81,52 @@ public class HomePresenterImpl implements HomeContract.HomePresenter {
         try {
             if (data instanceof PackageAppData) {
                 PackageAppData appData = (PackageAppData) data;
+                boolean fastOpen = appData.fastOpen;
                 appData.isFirstOpen = false;
-                LoadingActivity.launch(mActivity, appData.packageName, 0);
+                launch(appData.packageName,
+                        0);
             } else if (data instanceof MultiplePackageAppData) {
                 MultiplePackageAppData multipleData = (MultiplePackageAppData) data;
+                boolean fastOpen = multipleData.isFirstOpen;
                 multipleData.isFirstOpen = false;
-                LoadingActivity.launch(mActivity, multipleData.appInfo.packageName, ((MultiplePackageAppData) data).userId);
+                launch(multipleData.appInfo.packageName,
+                        ((MultiplePackageAppData) data).userId);
             }
         } catch (Throwable e) {
             e.printStackTrace();
         }
+    }
+
+    VirtualCore.UiCallback mUiCallback = new VirtualCore.UiCallback() {
+        @Override
+        public void onAppOpened(String packageName, int userId) throws RemoteException {
+            Timber.e("open " + packageName + " - " + userId);
+        }
+    };
+
+    private void launch(String packageName, int userId) {
+        PackageAppData appModel = PackageAppDataStorage.get().acquire(packageName);
+        String name = appModel.getName();
+        Drawable icon = appModel.getIcon();
+        boolean fastOpen = appModel.fastOpen;
+        mView.showStartAppLoading(icon, String.format(Locale.ENGLISH, "Opening %s...", name));
+        Intent intent = VirtualCore.get().getLaunchIntent(packageName, userId);
+        VirtualCore.get().setUiCallback(intent, mUiCallback);
+        VUiKit.defer().when(() -> {
+            if (!fastOpen) {
+                try {
+                    VirtualCore.get().preOpt(packageName);
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            }
+            VActivityManager.get().startActivity(intent, userId);
+        }).done(new DoneCallback<Void>() {
+            @Override
+            public void onDone(Void result) {
+                mView.hideStartAppLoading();
+            }
+        });
     }
 
     @Override
