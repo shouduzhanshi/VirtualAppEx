@@ -120,11 +120,11 @@ public class FitTextView extends BaseTextView {
     protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
         super.onMeasure(widthMeasureSpec, heightMeasureSpec);
 
-        int widthMode = View.MeasureSpec.getMode(widthMeasureSpec);
-        int heightMode = View.MeasureSpec.getMode(heightMeasureSpec);
+        int widthMode = MeasureSpec.getMode(widthMeasureSpec);
+        int heightMode = MeasureSpec.getMode(heightMeasureSpec);
 
-        if (widthMode == View.MeasureSpec.UNSPECIFIED
-                && heightMode == View.MeasureSpec.UNSPECIFIED) {
+        if (widthMode == MeasureSpec.UNSPECIFIED
+                && heightMode == MeasureSpec.UNSPECIFIED) {
             super.setTextSize(TypedValue.COMPLEX_UNIT_PX, mOriginalTextSize);
             mMeasured = false;
         } else {
@@ -134,7 +134,7 @@ public class FitTextView extends BaseTextView {
     }
 
     @Override
-    public void setText(CharSequence text, TextView.BufferType type) {
+    public void setText(CharSequence text, BufferType type) {
         mOriginalText = text;
         super.setText(text, type);
         fitText(text);

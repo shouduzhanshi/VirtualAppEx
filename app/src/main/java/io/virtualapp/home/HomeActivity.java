@@ -3,34 +3,24 @@ package io.virtualapp.home;
 import android.animation.Animator;
 import android.animation.ObjectAnimator;
 import android.annotation.SuppressLint;
-import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Canvas;
 import android.graphics.Color;
-import android.graphics.drawable.ColorDrawable;
-import android.graphics.drawable.Drawable;
-import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
 import android.support.annotation.Nullable;
-import android.support.v4.widget.PopupWindowCompat;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.widget.OrientationHelper;
 import android.support.v7.widget.PopupMenu;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.StaggeredGridLayoutManager;
 import android.support.v7.widget.helper.ItemTouchHelper;
-import android.util.Log;
 import android.view.ContextThemeWrapper;
-import android.view.Gravity;
-import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ImageView;
-import android.widget.PopupWindow;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -42,20 +32,14 @@ import com.lody.virtual.os.VUserManager;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Timer;
-import java.util.TimerTask;
 
-import butterknife.BindView;
-import butterknife.ButterKnife;
 import io.virtualapp.R;
-import io.virtualapp.VApp;
 import io.virtualapp.VCommends;
 import io.virtualapp.abs.nestedadapter.SmartRecyclerAdapter;
 import io.virtualapp.abs.ui.VActivity;
 import io.virtualapp.abs.ui.VUiKit;
 import io.virtualapp.home.adapters.LaunchpadAdapter;
 import io.virtualapp.home.adapters.decorations.ItemOffsetDecoration;
-import io.virtualapp.home.listapp.ListAppActivity;
 import io.virtualapp.home.location.VirtualLocationSettings;
 import io.virtualapp.home.models.AddAppButton;
 import io.virtualapp.home.models.AppData;
@@ -63,9 +47,7 @@ import io.virtualapp.home.models.AppInfoLite;
 import io.virtualapp.home.models.EmptyAppData;
 import io.virtualapp.home.models.MultiplePackageAppData;
 import io.virtualapp.home.models.PackageAppData;
-import io.virtualapp.widgets.EatBeansView;
 import io.virtualapp.widgets.TwoGearsView;
-import timber.log.Timber;
 
 import static android.support.v7.widget.helper.ItemTouchHelper.ACTION_STATE_DRAG;
 import static android.support.v7.widget.helper.ItemTouchHelper.DOWN;
@@ -75,47 +57,25 @@ import static android.support.v7.widget.helper.ItemTouchHelper.RIGHT;
 import static android.support.v7.widget.helper.ItemTouchHelper.START;
 import static android.support.v7.widget.helper.ItemTouchHelper.UP;
 
-
 /**
  * @author Lody
  */
-public class HomeActivity extends VActivity<HomePresenterImpl> implements HomeContract.HomeView {
+public class HomeActivity extends VActivity implements HomeContract.HomeView {
 
-    @BindView(R.id.pb_loading_app)
-    TwoGearsView mLoadingView;
+    private static final String TAG = HomeActivity.class.getSimpleName();
 
-    @BindView(R.id.home_launcher)
-    RecyclerView mLauncherView;
-
-    @BindView(R.id.home_menu)
-    View mMenuView;
-
+    private HomeContract.HomePresenter mPresenter;
+    private TwoGearsView mLoadingView;
+    private RecyclerView mLauncherView;
+    private View mMenuView;
     private PopupMenu mPopupMenu;
-
-    @BindView(R.id.bottom_area)
-    View mBottomArea;
-
-    @BindView(R.id.create_shortcut_area)
-    View mCreateShortcutBox;
-
-    @BindView(R.id.create_shortcut_text)
-    TextView mCreateShortcutTextView;
-
-    @BindView(R.id.delete_app_area)
-    View mDeleteAppBox;
-
-    @BindView(R.id.delete_app_text)
-    TextView mDeleteAppTextView;
-
+    private View mBottomArea;
+    private View mCreateShortcutBox;
+    private TextView mCreateShortcutTextView;
+    private View mDeleteAppBox;
+    private TextView mDeleteAppTextView;
     private LaunchpadAdapter mLaunchpadAdapter;
-
     private Handler mUiHandler;
-    private AlertDialog.Builder builder;
-    private PopupWindow startAppLoading;
-    private EatBeansView loadingView;
-    private ImageView iconView;
-    private TextView nameView;
-    private View view;
 
 
     public static void goHome(Context context) {
@@ -126,27 +86,26 @@ public class HomeActivity extends VActivity<HomePresenterImpl> implements HomeCo
     }
 
     @Override
-    public int setViewRes() {
-        return R.layout.activity_home;
-    }
-
-    @Override
-    public void initView(Bundle savedInstanceState) {
+    protected void onCreate(@Nullable Bundle savedInstanceState) {
+        overridePendingTransition(0, 0);
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_home);
         mUiHandler = new Handler(Looper.getMainLooper());
+        bindViews();
         initLaunchpad();
         initMenu();
-    }
-
-    @Override
-    protected void setPresenterParm(HomePresenterImpl mPresenter) {
-        mPresenter.setParm(this);
+        new HomePresenterImpl(this).start();
     }
 
     private void initMenu() {
         mPopupMenu = new PopupMenu(new ContextThemeWrapper(this, R.style.Theme_AppCompat_Light), mMenuView);
         Menu menu = mPopupMenu.getMenu();
         setIconEnable(menu, true);
-        menu.add(getResources().getString(R.string.accounts)).setIcon(R.drawable.ic_account).setOnMenuItemClickListener(item -> {
+        menu.add("Xposed Manager").setIcon(R.drawable.ic_xposed).setOnMenuItemClickListener(item -> {
+            startActivity(new Intent(this, XposedManagerActivity.class));
+            return false;
+        });
+        menu.add("Accounts").setIcon(R.drawable.ic_account).setOnMenuItemClickListener(item -> {
             List<VUserInfo> users = VUserManager.get().getUsers();
             List<String> names = new ArrayList<>(users.size());
             for (VUserInfo info : users) {
@@ -157,7 +116,7 @@ public class HomeActivity extends VActivity<HomePresenterImpl> implements HomeCo
                 items[i] = names.get(i);
             }
             new AlertDialog.Builder(this)
-                    .setTitle(getResources().getString(R.string.please_select_an_user))
+                    .setTitle("Please select an user")
                     .setItems(items, (dialog, which) -> {
                         VUserInfo info = users.get(which);
                         Intent intent = new Intent(this, ChooseTypeAndAccountActivity.class);
@@ -166,20 +125,20 @@ public class HomeActivity extends VActivity<HomePresenterImpl> implements HomeCo
                     }).show();
             return false;
         });
-        menu.add(getResources().getString(R.string.virtual_storage)).setIcon(R.drawable.ic_vs).setOnMenuItemClickListener(item -> {
-            Toast.makeText(this, getResources().getString(R.string.the_coming), Toast.LENGTH_SHORT).show();
+        menu.add("Virtual Storage").setIcon(R.drawable.ic_vs).setOnMenuItemClickListener(item -> {
+            Toast.makeText(this, "The coming", Toast.LENGTH_SHORT).show();
             return false;
         });
-        menu.add(getResources().getString(R.string.notification)).setIcon(R.drawable.ic_notification).setOnMenuItemClickListener(item -> {
-            Toast.makeText(this, getResources().getString(R.string.the_coming), Toast.LENGTH_SHORT).show();
+        menu.add("Notification").setIcon(R.drawable.ic_notification).setOnMenuItemClickListener(item -> {
+            Toast.makeText(this, "The coming", Toast.LENGTH_SHORT).show();
             return false;
         });
-        menu.add(getResources().getString(R.string.virtual_location)).setIcon(R.drawable.ic_notification).setOnMenuItemClickListener(item -> {
+        menu.add("Virtual Location").setIcon(R.drawable.ic_notification).setOnMenuItemClickListener(item -> {
             startActivity(new Intent(this, VirtualLocationSettings.class));
             return true;
         });
-        menu.add(getResources().getString(R.string.settings)).setIcon(R.drawable.ic_settings).setOnMenuItemClickListener(item -> {
-            Toast.makeText(this, getResources().getString(R.string.the_coming), Toast.LENGTH_SHORT).show();
+        menu.add("Settings").setIcon(R.drawable.ic_settings).setOnMenuItemClickListener(item -> {
+            Toast.makeText(this, "The coming", Toast.LENGTH_SHORT).show();
             return false;
         });
         mMenuView.setOnClickListener(v -> mPopupMenu.show());
@@ -194,6 +153,17 @@ public class HomeActivity extends VActivity<HomePresenterImpl> implements HomeCo
         } catch (Exception e) {
             e.printStackTrace();
         }
+    }
+
+    private void bindViews() {
+        mLoadingView = (TwoGearsView) findViewById(R.id.pb_loading_app);
+        mLauncherView = (RecyclerView) findViewById(R.id.home_launcher);
+        mMenuView = findViewById(R.id.home_menu);
+        mBottomArea = findViewById(R.id.bottom_area);
+        mCreateShortcutBox = findViewById(R.id.create_shortcut_area);
+        mCreateShortcutTextView = (TextView) findViewById(R.id.create_shortcut_text);
+        mDeleteAppBox = findViewById(R.id.delete_app_area);
+        mDeleteAppTextView = (TextView) findViewById(R.id.delete_app_text);
     }
 
     private void initLaunchpad() {
@@ -213,14 +183,12 @@ public class HomeActivity extends VActivity<HomePresenterImpl> implements HomeCo
             if (!data.isLoading()) {
                 if (data instanceof AddAppButton) {
                     onAddAppButtonClick();
-                    return;
                 }
                 mLaunchpadAdapter.notifyItemChanged(pos);
                 mPresenter.launchApp(data);
             }
         });
     }
-
 
     private void onAddAppButtonClick() {
         ListAppActivity.gotoListApp(this);
@@ -243,6 +211,11 @@ public class HomeActivity extends VActivity<HomePresenterImpl> implements HomeCo
         if (model instanceof PackageAppData || model instanceof MultiplePackageAppData) {
             mPresenter.createShortcut(model);
         }
+    }
+
+    @Override
+    public void setPresenter(HomeContract.HomePresenter presenter) {
+        mPresenter = presenter;
     }
 
     @Override
@@ -359,31 +332,6 @@ public class HomeActivity extends VActivity<HomePresenterImpl> implements HomeCo
     }
 
     @Override
-    public void showStartAppLoading(Drawable icon, String format) {
-        Timber.e("showStartAppLoading");
-        if (startAppLoading == null) {
-            view = getLayoutInflater().inflate(R.layout.activity_loading, null, false);
-            startAppLoading = new PopupWindow(view, ViewGroup.LayoutParams.MATCH_PARENT,VUiKit.dpToPx(this, 128));
-            startAppLoading.setOutsideTouchable(false);
-            loadingView = (EatBeansView) view.findViewById(R.id.loading_anim);
-            loadingView.setAnimSpeed(1000);
-            iconView = (ImageView) view.findViewById(R.id.app_icon);
-            nameView = (TextView) view.findViewById(R.id.app_name);
-        }
-        loadingView.startAnim();
-        startAppLoading.showAtLocation(view, Gravity.BOTTOM, 0, 0);
-        iconView.setImageDrawable(icon);
-        nameView.setText(format);
-    }
-
-    @Override
-    public void hideStartAppLoading() {
-        Timber.e("hideStartAppLoading");
-        loadingView.stopAnim();
-        startAppLoading.dismiss();
-    }
-
-    @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
         if (resultCode == RESULT_OK && data != null) {
@@ -469,7 +417,7 @@ public class HomeActivity extends VActivity<HomePresenterImpl> implements HomeCo
                 AppData data = mLaunchpadAdapter.getList().get(target.getAdapterPosition());
                 return data.canReorder();
             } catch (IndexOutOfBoundsException e) {
-//                e.printStackTrace();
+                e.printStackTrace();
             }
             return false;
         }
@@ -533,36 +481,6 @@ public class HomeActivity extends VActivity<HomePresenterImpl> implements HomeCo
                 upAtDeleteAppArea = false;
                 mDeleteAppTextView.setTextColor(Color.WHITE);
                 mCreateShortcutTextView.setTextColor(Color.WHITE);
-            }
-        }
-    }
-
-    @Override
-    public void onBackPressed() {
-        exitBy2click();
-    }
-
-    boolean isExit;
-
-    /**
-     * 双击退出程序
-     */
-    public void exitBy2click() {
-        Timer eExit = null;
-        if (isExit == false) {
-            isExit = true;
-            Toast.makeText(this, "再按一次退出程序", Toast.LENGTH_SHORT).show();
-            eExit = new Timer();
-            eExit.schedule(new TimerTask() {
-                @Override
-                public void run() {
-                    isExit = false;
-                }
-            }, 2000);
-        } else {
-            List<Activity> activities = VApp.getActivitys();
-            for (Activity temp : activities) {
-                temp.finish();
             }
         }
     }

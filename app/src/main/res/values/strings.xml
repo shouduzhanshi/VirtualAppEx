@@ -1,8 +1,8 @@
 <resources>
-    <string name="app_name">VirtualAppEx</string>
+    <string name="app_name">SandVXposed</string>
     <string name="wait">Please wait…</string>
     <string name="desktop">Desktop</string>
-    <string name="add_app">Add App</string>
+    <string name="add_app">Add App/Module</string>
     <string name="preparing">Opening the app…</string>
     <string name="delete">Delete</string>
     <string name="create_shortcut">Create shortcut</string>
@@ -21,12 +21,7 @@
     <string name="external_storage">External Storage</string>
     <string name="install_d">Install (%d)</string>
     <string name="install_too_much_once_time">No more then 9 apps can be chosen at a time!</string>
-    <string name="accounts">Accounts</string>
-    <string name="virtual_storage">Virtual Storage</string>
-    <string name="notification">Notification</string>
-    <string name="virtual_location">Virtual Location</string>
-    <string name="settings">Settings</string>
-    <string name="please_select_an_user">Please select an user</string>
-    <string name="the_coming">The coming</string>
-    <string name="add_from_disk">Install from disk</string>
+
+    <string name="enable_xposed">enable xposed</string>
+    <string name="module_install_success">Xposed moudle %s install success!</string>
 </resources>

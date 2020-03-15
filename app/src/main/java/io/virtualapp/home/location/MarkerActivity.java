@@ -34,39 +34,31 @@ import com.tencent.tencentmap.mapsdk.map.CameraUpdateFactory;
 import com.tencent.tencentmap.mapsdk.map.MapView;
 import com.tencent.tencentmap.mapsdk.map.TencentMap;
 
-import butterknife.BindView;
 import io.virtualapp.abs.ui.VActivity;
 import io.virtualapp.R;
 
 public class MarkerActivity extends VActivity implements TencentMap.OnMapClickListener, TencentLocationListener {
-
     private TencentMap mMap;
-    @BindView(R.id.map)
-    MapView mapView;
+    private MapView mapView;
     private LatLng mLatLng = new LatLng(39.9182645956, 116.3970032689);
-
-    @BindView(R.id.address)
-    TextView pathText;
+    private TextView pathText;
     private TencentSearch geocoderSearch;
     private String mAddress;
     private boolean isNoPoint = true;
     private VLocation mVLocation;
 
-    @BindView(R.id.task_top_toolbar)
-    Toolbar toolbar;
-
     @Override
-    public int setViewRes() {
-        return R.layout.activity_marker;
-    }
-
-    @Override
-    public void initView(Bundle savedInstanceState) {
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_marker);
         setResult(Activity.RESULT_CANCELED);
+        Toolbar toolbar = bind(R.id.task_top_toolbar);
         setSupportActionBar(toolbar);
         //地址显示，暂时不用
+        pathText = bind(R.id.address);
         pathText.setVisibility(View.VISIBLE);
         enableBackHome();
+        mapView = (MapView) findViewById(R.id.map);
         mapView.onCreate(savedInstanceState); // 此方法必须重写
         mMap = mapView.getMap();
         mMap.setOnMapClickListener(this);
@@ -80,6 +72,7 @@ public class MarkerActivity extends VActivity implements TencentMap.OnMapClickLi
                 isNoPoint = false;
             }
         }
+
         if (isNoPoint) {
             startLocation();
         } else {
@@ -87,12 +80,10 @@ public class MarkerActivity extends VActivity implements TencentMap.OnMapClickLi
         }
     }
 
-    @Override
-    protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-
+    @SuppressWarnings("unchecked")
+    protected <T extends View> T bind(int id) {
+        return (T) findViewById(id);
     }
-
 
     public void enableBackHome() {
         ActionBar actionBar = getSupportActionBar();
@@ -102,7 +93,7 @@ public class MarkerActivity extends VActivity implements TencentMap.OnMapClickLi
     }
 
     private void startLocation() {
-        Toast.makeText(this, "onCreate location", Toast.LENGTH_SHORT).show();
+        Toast.makeText(this, "start location", Toast.LENGTH_SHORT).show();
         TencentLocationRequest request = TencentLocationRequest.create()
                 .setRequestLevel(TencentLocationRequest.REQUEST_LEVEL_GEO)
                 .setAllowGPS(true);
@@ -162,10 +153,10 @@ public class MarkerActivity extends VActivity implements TencentMap.OnMapClickLi
                 if (mLatLng != null) {
                     /**
                      * TODO edit info
-                     * @see com.lody.virtual.remote.vloc.VLocation#altitude
-                     * @see com.lody.virtual.remote.vloc.VLocation#accuracy
-                     * @see com.lody.virtual.remote.vloc.VLocation#speed
-                     * @see com.lody.virtual.remote.vloc.VLocation#bearing
+                     * @see VLocation#altitude
+                     * @see VLocation#accuracy
+                     * @see VLocation#speed
+                     * @see VLocation#bearing
                      */
                     if (mVLocation == null) {
                         mVLocation = new VLocation();

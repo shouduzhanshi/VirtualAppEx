@@ -1,28 +1,17 @@
 package io.virtualapp.home;
 
 import android.app.Activity;
-import android.content.Intent;
-import android.content.pm.ApplicationInfo;
-import android.content.pm.PackageInfo;
-import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
-import android.graphics.drawable.Drawable;
-import android.os.Handler;
-import android.os.RemoteException;
+import android.widget.Toast;
 
 import com.lody.virtual.GmsSupport;
 import com.lody.virtual.client.core.VirtualCore;
-import com.lody.virtual.client.ipc.VActivityManager;
 import com.lody.virtual.os.VUserInfo;
 import com.lody.virtual.os.VUserManager;
 import com.lody.virtual.remote.InstallResult;
 import com.lody.virtual.remote.InstalledAppInfo;
 
-import org.jdeferred.DoneCallback;
-
-import java.io.File;
 import java.io.IOException;
-import java.util.Locale;
 
 import io.virtualapp.R;
 import io.virtualapp.VCommends;
@@ -34,28 +23,27 @@ import io.virtualapp.home.models.PackageAppData;
 import io.virtualapp.home.repo.AppRepository;
 import io.virtualapp.home.repo.PackageAppDataStorage;
 import jonathanfinerty.once.Once;
-import timber.log.Timber;
 
 /**
  * @author Lody
  */
-public class HomePresenterImpl implements HomeContract.HomePresenter {
+class HomePresenterImpl implements HomeContract.HomePresenter {
 
     private HomeContract.HomeView mView;
     private Activity mActivity;
     private AppRepository mRepo;
+    private AppData mTempAppData;
 
 
-
-    public void setParm(HomeContract.HomeView view) {
+    HomePresenterImpl(HomeContract.HomeView view) {
         mView = view;
         mActivity = view.getActivity();
         mRepo = new AppRepository(mActivity);
+        mView.setPresenter(this);
     }
 
-
     @Override
-    public void onCreate() {
+    public void start() {
         dataChanged();
         if (!Once.beenDone(VCommends.TAG_SHOW_ADD_APP_GUIDE)) {
             mView.showGuide();
@@ -68,71 +56,20 @@ public class HomePresenterImpl implements HomeContract.HomePresenter {
     }
 
     @Override
-    public void onResume() {
-
-    }
-
-    @Override
-    public void onPause() {
-
-    }
-
-    @Override
-    public void onDestroy() {
-
-    }
-
-    @Override
     public void launchApp(AppData data) {
         try {
             if (data instanceof PackageAppData) {
                 PackageAppData appData = (PackageAppData) data;
-//                boolean fastOpen = appData.fastOpen;
                 appData.isFirstOpen = false;
-                launch(appData.packageName,
-                        0);
+                LoadingActivity.launch(mActivity, appData.packageName, 0);
             } else if (data instanceof MultiplePackageAppData) {
                 MultiplePackageAppData multipleData = (MultiplePackageAppData) data;
-                boolean fastOpen = multipleData.isFirstOpen;
                 multipleData.isFirstOpen = false;
-                launch(multipleData.appInfo.packageName,
-                        ((MultiplePackageAppData) data).userId);
+                LoadingActivity.launch(mActivity, multipleData.appInfo.packageName, ((MultiplePackageAppData) data).userId);
             }
         } catch (Throwable e) {
             e.printStackTrace();
         }
-    }
-
-    VirtualCore.UiCallback mUiCallback = new VirtualCore.UiCallback() {
-        @Override
-        public void onAppOpened(String packageName, int userId) throws RemoteException {
-            Timber.e("open " + packageName + " - " + userId);
-        }
-    };
-
-    private void launch(String packageName, int userId) {
-        PackageAppData appModel = PackageAppDataStorage.get().acquire(packageName);
-        String name = appModel.getName();
-        Drawable icon = appModel.getIcon();
-        boolean fastOpen = appModel.fastOpen;
-        mView.showStartAppLoading(icon, String.format(Locale.ENGLISH, "Opening %s...", name));
-        Intent intent = VirtualCore.get().getLaunchIntent(packageName, userId);
-        VirtualCore.get().setUiCallback(intent, mUiCallback);
-        VUiKit.defer().when(() -> {
-            if (!fastOpen) {
-                try {
-                    VirtualCore.get().preOpt(packageName);
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
-            }
-            VActivityManager.get().startActivity(intent, userId);
-        }).done(new DoneCallback<Void>() {
-            @Override
-            public void onDone(Void result) {
-                mView.hideStartAppLoading();
-            }
-        });
     }
 
     @Override
@@ -141,21 +78,19 @@ public class HomePresenterImpl implements HomeContract.HomePresenter {
         mRepo.getVirtualApps().done(mView::loadFinish).fail(mView::loadError);
     }
 
-    class AddResult {
-        private PackageAppData appData = new PackageAppData();
-        private int userId;
-        private boolean justEnableHidden;
-    }
 
     @Override
     public void addApp(AppInfoLite info) {
+        class AddResult {
+            private PackageAppData appData;
+            private int userId;
+            private boolean justEnableHidden;
+        }
         AddResult addResult = new AddResult();
         VUiKit.defer().when(() -> {
             InstalledAppInfo installedAppInfo = VirtualCore.get().getInstalledAppInfo(info.packageName, 0);
             addResult.justEnableHidden = installedAppInfo != null;
             if (addResult.justEnableHidden) {
-                updateUI(installedAppInfo.packageName, addResult);
-                /**本机安装 克隆模式*/
                 int[] userIds = installedAppInfo.getInstalledUsers();
                 int nextUserId = userIds.length;
                 /*
@@ -169,6 +104,7 @@ public class HomePresenterImpl implements HomeContract.HomePresenter {
                     }
                 }
                 addResult.userId = nextUserId;
+
                 if (VUserManager.get().getUserInfo(nextUserId) == null) {
                     // user not exist, create it automatically.
                     String nextUserName = "Space " + (nextUserId + 1);
@@ -182,84 +118,37 @@ public class HomePresenterImpl implements HomeContract.HomePresenter {
                     throw new IllegalStateException();
                 }
             } else {
-                updateUI1(info.path, addResult);
-                /**安装模式*/
                 InstallResult res = mRepo.addVirtualApp(info);
-                new File(info.path).delete();
-                info.packageName = res.packageName;
                 if (!res.isSuccess) {
                     throw new IllegalStateException();
+                } else {
+                    InstalledAppInfo ins = VirtualCore.get().getInstalledAppInfo(info.packageName, 0);
+                    if (ins != null && ins.xposedModule != null) {
+                        String name = ins.getApplicationInfo(0).name;
+
+                    }
                 }
             }
         }).then((res) -> {
-            PackageAppData acquire = PackageAppDataStorage.get().acquire(info.packageName);
-//            addResult.appData.setIcon(acquire.getIcon());
-            addResult.appData.setName(acquire.getName());
-//            addResult.appData.setPackageName(acquire.getPackageName());
-//            addResult.appData.setFirstOpen(acquire.isFirstOpen());
-//            addResult.appData.setFastOpen(acquire.isFastOpen());
+            addResult.appData = PackageAppDataStorage.get().acquire(info.packageName);
         }).done(res -> {
             boolean multipleVersion = addResult.justEnableHidden && addResult.userId != 0;
+            if (addResult.appData.getXposedModule() != null) {
+                Toast.makeText(mActivity, String.format(mActivity.getString(R.string.module_install_success), addResult.appData.name), Toast.LENGTH_SHORT).show();
+                return;
+            }
             if (!multipleVersion) {
                 PackageAppData data = addResult.appData;
                 data.isLoading = true;
-//                mView.addAppToLauncher(data);
+                mView.addAppToLauncher(data);
                 handleOptApp(data, info.packageName, true);
             } else {
                 MultiplePackageAppData data = new MultiplePackageAppData(addResult.appData, addResult.userId);
                 data.isLoading = true;
-//                mView.addAppToLauncher(data);
+                mView.addAppToLauncher(data);
                 handleOptApp(data, info.packageName, false);
             }
         });
-    }
-
-    private void updateUI1(String path, AddResult addResult) {
-        Timber.e("updateUI1");
-        PackageManager packageManager = mActivity.getPackageManager();
-        PackageInfo packageArchiveInfo = packageManager.getPackageArchiveInfo(path, 0);
-        ApplicationInfo applicationInfo = packageArchiveInfo.applicationInfo;
-        addResult.appData.setLoading(true);
-        addResult.appData.setFastOpen(true);
-        addResult.appData.setFirstOpen(true);
-        addResult.appData.setPackageName(applicationInfo.packageName);
-        try {
-            addResult.appData.setName(packageArchiveInfo.applicationInfo.loadLabel(packageManager).toString());
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-        addResult.appData.setIcon(applicationInfo.loadIcon(packageManager));
-        mActivity.runOnUiThread(new Runnable() {
-            @Override
-            public void run() {
-                Timber.e("runOnUiThread");
-                mView.addAppToLauncher(addResult.appData);
-            }
-        });
-
-    }
-
-    private void updateUI(String pn, AddResult addResult) {
-        Timber.e("updateUI");
-        PackageManager packageManager = mActivity.getPackageManager();
-        try {
-            ApplicationInfo applicationInfo = packageManager.getApplicationInfo(pn, 0);
-            addResult.appData.setLoading(true);
-            addResult.appData.setFastOpen(true);
-            addResult.appData.setFirstOpen(true);
-            addResult.appData.setPackageName(pn);
-            addResult.appData.setName(applicationInfo.loadLabel(packageManager).toString());
-            addResult.appData.setIcon(applicationInfo.loadIcon(mActivity.getPackageManager()));
-            mActivity.runOnUiThread(new Runnable() {
-                @Override
-                public void run() {
-                    Timber.e("runOnUiThread");
-                    mView.addAppToLauncher(addResult.appData);
-                }
-            });
-        } catch (PackageManager.NameNotFoundException e) {
-            e.printStackTrace();
-        }
     }
 
 
@@ -310,7 +199,6 @@ public class HomePresenterImpl implements HomeContract.HomePresenter {
 
     @Override
     public void createShortcut(AppData data) {
-        Timber.e("createShortcut");
         VirtualCore.OnEmitShortcutListener listener = new VirtualCore.OnEmitShortcutListener() {
             @Override
             public Bitmap getIcon(Bitmap originIcon) {
@@ -329,6 +217,5 @@ public class HomePresenterImpl implements HomeContract.HomePresenter {
             VirtualCore.get().createShortcut(appData.userId, appData.appInfo.packageName, listener);
         }
     }
-
 
 }

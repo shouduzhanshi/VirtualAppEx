@@ -1,8 +1,5 @@
-package io.virtualapp.home.listapp;
+package io.virtualapp.home;
 
-import android.support.v4.app.FragmentActivity;
-
-import java.io.File;
 import java.util.List;
 
 import io.virtualapp.abs.BasePresenter;
@@ -23,6 +20,5 @@ import io.virtualapp.home.models.AppInfo;
 
     interface ListAppPresenter extends BasePresenter {
 
-        void setParm(FragmentActivity activity, ListAppContract.ListAppView view, File selectFrom);
     }
 }

@@ -1,6 +1,5 @@
 package io.virtualapp.home;
 
-import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
@@ -13,7 +12,6 @@ import com.lody.virtual.client.ipc.VActivityManager;
 
 import java.util.Locale;
 
-import butterknife.BindView;
 import io.virtualapp.R;
 import io.virtualapp.abs.ui.VActivity;
 import io.virtualapp.abs.ui.VUiKit;
@@ -28,18 +26,10 @@ import io.virtualapp.widgets.EatBeansView;
 public class LoadingActivity extends VActivity {
 
     private static final String PKG_NAME_ARGUMENT = "MODEL_ARGUMENT";
-
     private static final String KEY_INTENT = "KEY_INTENT";
-
     private static final String KEY_USER = "KEY_USER";
-
     private PackageAppData appModel;
-    @BindView(R.id.loading_anim)
-    EatBeansView loadingView;
-    @BindView(R.id.app_icon)
-    ImageView iconView;
-    @BindView(R.id.app_name)
-    TextView nameView;
+    private EatBeansView loadingView;
 
     public static void launch(Context context, String packageName, int userId) {
         Intent intent = VirtualCore.get().getLaunchIntent(packageName, userId);
@@ -54,16 +44,16 @@ public class LoadingActivity extends VActivity {
     }
 
     @Override
-    public int setViewRes() {
-        return R.layout.activity_loading;
-    }
-
-    @Override
-    public void initView(Bundle savedInstanceState) {
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_loading);
+        loadingView = (EatBeansView) findViewById(R.id.loading_anim);
         int userId = getIntent().getIntExtra(KEY_USER, -1);
         String pkg = getIntent().getStringExtra(PKG_NAME_ARGUMENT);
         appModel = PackageAppDataStorage.get().acquire(pkg);
+        ImageView iconView = (ImageView) findViewById(R.id.app_icon);
         iconView.setImageDrawable(appModel.icon);
+        TextView nameView = (TextView) findViewById(R.id.app_name);
         nameView.setText(String.format(Locale.ENGLISH, "Opening %s...", appModel.name));
         Intent intent = getIntent().getParcelableExtra(KEY_INTENT);
         if (intent == null) {
@@ -80,23 +70,16 @@ public class LoadingActivity extends VActivity {
             }
             VActivityManager.get().startActivity(intent, userId);
         });
+
     }
 
-    VirtualCore.UiCallback mUiCallback = new VirtualCore.UiCallback() {
-        Activity activity = getActivity();
+    private final VirtualCore.UiCallback mUiCallback = new VirtualCore.UiCallback() {
 
         @Override
         public void onAppOpened(String packageName, int userId) throws RemoteException {
-            activity.finish();
-            activity = null;
+            finish();
         }
     };
-
-    @Override
-    protected void onDestroy() {
-        super.onDestroy();
-        mUiCallback = null;
-    }
 
     @Override
     protected void onResume() {
@@ -109,6 +92,4 @@ public class LoadingActivity extends VActivity {
         super.onPause();
         loadingView.stopAnim();
     }
-
-
 }

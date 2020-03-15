@@ -3,6 +3,8 @@ package io.virtualapp.home.models;
 import android.content.Context;
 import android.graphics.drawable.Drawable;
 
+import com.lody.virtual.server.pm.parser.VPackage;
+
 import io.virtualapp.R;
 
 /**
@@ -14,19 +16,10 @@ public class AddAppButton implements AppData {
     private String name;
     private Drawable icon;
 
-    public void setName(String name) {
-        this.name = name;
-    }
-
-    public void setIcon(Drawable icon) {
-        this.icon = icon;
-    }
-
     public AddAppButton(Context context) {
         name = context.getResources().getString(R.string.add_app);
         icon = context.getResources().getDrawable(R.drawable.ic_add_circle);
     }
-
 
     @Override
     public boolean isLoading() {
@@ -49,6 +42,16 @@ public class AddAppButton implements AppData {
     }
 
     @Override
+    public String getPackageName() {
+        return null;
+    }
+
+    @Override
+    public String versionName() {
+        return null;
+    }
+
+    @Override
     public boolean canReorder() {
         return false;
     }
@@ -66,5 +69,10 @@ public class AddAppButton implements AppData {
     @Override
     public boolean canCreateShortcut() {
         return false;
+    }
+
+    @Override
+    public VPackage.XposedModule getXposedModule() {
+        return null;
     }
 }

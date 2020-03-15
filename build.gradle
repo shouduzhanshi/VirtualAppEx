@@ -2,17 +2,18 @@
 
 buildscript {
     repositories {
-        jcenter()
         maven {
-            url 'https://maven.google.com/'
+            url 'https://dl.google.com/dl/android/maven2/'
             name 'Google'
         }
+        //maven { url 'http://maven.aliyun.com/nexus/content/groups/public/' }
+        jcenter()
+        google()
     }
     dependencies {
         classpath 'com.android.tools.build:gradle:3.3.2'
-        classpath 'com.jakewharton:butterknife-gradle-plugin:10.2.1'
-        //工具已较长时间没有更新过了,项目仅依赖并未使用过,故注释
-//        classpath 'com.android.tools.build:gradle-experimental:0.11.0'
+        // classpath 'com.android.tools.build:gradle-experimental:3.3.2'
+        classpath 'com.trend.lazyinject:aopweave:3.4.0-beta'
         // NOTE: Do not place your application dependencies here; they belong
         // in the individual module build.gradle files
     }
@@ -20,22 +21,15 @@ buildscript {
 
 allprojects {
     repositories {
+        maven {
+            url 'https://dl.google.com/dl/android/maven2/'
+            name 'Google'
+        }
+         // maven { url 'http://maven.aliyun.com/nexus/content/groups/public/' }
         jcenter()
-        google()
         maven {
             url "https://jitpack.io"
         }
-        maven {
-            url 'https://maven.google.com/'
-            name 'Google'
-        }
-        maven { url 'http://maven.aliyun.com/nexus/content/repositories/releases/' }
-        maven {
-            url "http://repo.baichuan-android.taobao.com/content/groups/BaichuanRepositories/"
-        }
-        maven { url 'http://maven.aliyun.com/nexus/content/repositories/releases/' }
-        maven { url 'https://dl.bintray.com/umsdk/release' }
-        maven { url 'https://dl.bintray.com/aweme-open-sdk-team/public' }
     }
 }
 

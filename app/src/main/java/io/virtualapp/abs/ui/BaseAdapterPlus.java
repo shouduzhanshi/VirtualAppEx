@@ -11,8 +11,6 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
-import butterknife.ButterKnife;
-
 public abstract class BaseAdapterPlus<T> extends BaseAdapter implements SpinnerAdapter {
     protected Context context;
     private LayoutInflater mLayoutInflater;
@@ -143,10 +141,12 @@ public abstract class BaseAdapterPlus<T> extends BaseAdapter implements SpinnerA
         protected Context context;
 
         public BaseViewHolder(View view) {
-            ButterKnife.bind(this,view);
             this.view = view;
             this.context = view.getContext();
         }
 
+        protected <T extends View> T $(int id) {
+            return (T) view.findViewById(id);
+        }
     }
 }

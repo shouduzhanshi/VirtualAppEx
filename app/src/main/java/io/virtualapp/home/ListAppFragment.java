@@ -1,4 +1,4 @@
-package io.virtualapp.home.listapp;
+package io.virtualapp.home;
 
 import android.app.Activity;
 import android.content.Intent;
@@ -18,7 +18,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 
-import butterknife.BindView;
 import io.virtualapp.R;
 import io.virtualapp.VCommends;
 import io.virtualapp.abs.ui.VFragment;
@@ -32,24 +31,18 @@ import io.virtualapp.widgets.DragSelectRecyclerView;
 /**
  * @author Lody
  */
-public class ListAppFragment extends VFragment<ListAppPresenterImpl> implements ListAppContract.ListAppView {
+public class ListAppFragment extends VFragment<ListAppContract.ListAppPresenter> implements ListAppContract.ListAppView {
     private static final String KEY_SELECT_FROM = "key_select_from";
-
-    @BindView(R.id.select_app_recycler_view)
-    DragSelectRecyclerView mRecyclerView;
-    @BindView(R.id.select_app_progress_bar)
-    ProgressBar mProgressBar;
-    @BindView(R.id.select_app_install_btn)
-     Button mInstallButton;
+    private DragSelectRecyclerView mRecyclerView;
+    private ProgressBar mProgressBar;
+    private Button mInstallButton;
     private CloneAppListAdapter mAdapter;
 
     public static ListAppFragment newInstance(File selectFrom) {
         Bundle args = new Bundle();
-        if (selectFrom != null) {
+        if (selectFrom != null)
             args.putString(KEY_SELECT_FROM, selectFrom.getPath());
-        }
         ListAppFragment fragment = new ListAppFragment();
-//        args.putInt("type", position);
         fragment.setArguments(args);
         return fragment;
     }
@@ -65,13 +58,23 @@ public class ListAppFragment extends VFragment<ListAppPresenterImpl> implements 
         return null;
     }
 
+    @Nullable
     @Override
-    public int setViewRes() {
-        return R.layout.fragment_list_app;
+    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+        return inflater.inflate(R.layout.fragment_list_app, null);
     }
 
     @Override
-    public void initView(View view) {
+    public void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+        mAdapter.saveInstanceState(outState);
+    }
+
+    @Override
+    public void onViewCreated(View view, Bundle savedInstanceState) {
+        mRecyclerView = (DragSelectRecyclerView) view.findViewById(R.id.select_app_recycler_view);
+        mProgressBar = (ProgressBar) view.findViewById(R.id.select_app_progress_bar);
+        mInstallButton = (Button) view.findViewById(R.id.select_app_install_btn);
         mRecyclerView.setLayoutManager(new StaggeredGridLayoutManager(3, OrientationHelper.VERTICAL));
         mRecyclerView.addItemDecoration(new ItemOffsetDecoration(VUiKit.dpToPx(getContext(), 2)));
         mAdapter = new CloneAppListAdapter(getActivity());
@@ -79,10 +82,6 @@ public class ListAppFragment extends VFragment<ListAppPresenterImpl> implements 
         mAdapter.setOnItemClickListener(new CloneAppListAdapter.ItemEventListener() {
             @Override
             public void onItemClick(AppInfo info, int position) {
-                if (info.type == 1) {
-                    onAddAppFromDiskClick();
-                    return;
-                }
                 int count = mAdapter.getSelectedCount();
                 if (!mAdapter.isIndexSelected(position)) {
                     if (count >= 9) {
@@ -114,29 +113,7 @@ public class ListAppFragment extends VFragment<ListAppPresenterImpl> implements 
             getActivity().setResult(Activity.RESULT_OK, data);
             getActivity().finish();
         });
-    }
-
-    @Override
-    protected void setPresenterParm(ListAppPresenterImpl mPresenter) {
-        mPresenter.setParm(getActivity(), this, getSelectFrom());
-    }
-
-    @Override
-    public void onSaveInstanceState(Bundle outState) {
-        super.onSaveInstanceState(outState);
-        mAdapter.saveInstanceState(outState);
-    }
-
-    private void onAddAppFromDiskClick() {
-        Intent intent = new Intent(Intent.ACTION_GET_CONTENT);
-        intent.setType("*/*");//无类型限制
-        intent.addCategory(Intent.CATEGORY_OPENABLE);
-        getActivity().startActivityForResult(intent, 9101);
-    }
-
-    @Override
-    public void onViewCreated(View view, Bundle savedInstanceState) {
-
+        new ListAppPresenterImpl(getActivity(), this, getSelectFrom()).start();
     }
 
     @Override
@@ -152,12 +129,11 @@ public class ListAppFragment extends VFragment<ListAppPresenterImpl> implements 
         mAdapter.setSelected(0, false);
         mProgressBar.setVisibility(View.GONE);
         mRecyclerView.setVisibility(View.VISIBLE);
-        AppInfo appInfo = new AppInfo();
-        appInfo.icon = getResources().getDrawable(R.drawable.ic_add_circle);
-        appInfo.name = "从磁盘添加";
-        appInfo.type = 1;
-        infoList.add(0, appInfo);
     }
 
+    @Override
+    public void setPresenter(ListAppContract.ListAppPresenter presenter) {
+        this.mPresenter = presenter;
+    }
 
 }

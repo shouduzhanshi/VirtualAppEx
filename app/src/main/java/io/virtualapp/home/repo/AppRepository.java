@@ -57,7 +57,7 @@ public class AppRepository implements AppDataSource {
     @Override
     public Promise<List<AppData>, Throwable, Void> getVirtualApps() {
         return VUiKit.defer().when(() -> {
-            List<InstalledAppInfo> infos = VirtualCore.get().getInstalledApps(0);
+            List<InstalledAppInfo> infos = VirtualCore.get().getInstalledApps(InstalledAppInfo.FLAG_EXCLUDE_XPOSED_MODULE);
             List<AppData> models = new ArrayList<>();
             for (InstalledAppInfo info : infos) {
                 if (!VirtualCore.get().isPackageLaunchable(info.packageName)) {
@@ -79,14 +79,39 @@ public class AppRepository implements AppDataSource {
     }
 
     @Override
+    public Promise<List<AppData>, Throwable, Void> getVirtualXposedModules() {
+        return VUiKit.defer().when(() -> {
+            List<InstalledAppInfo> infos = VirtualCore.get().getInstalledApps(InstalledAppInfo.FLAG_XPOSED_MODULE);
+            List<AppData> models = new ArrayList<>();
+            for (InstalledAppInfo info : infos) {
+                PackageAppData data = new PackageAppData(mContext, info);
+                if (VirtualCore.get().isAppInstalledAsUser(0, info.packageName)) {
+                    models.add(data);
+                }
+                int[] userIds = info.getInstalledUsers();
+                for (int userId : userIds) {
+                    if (userId != 0) {
+                        models.add(new MultiplePackageAppData(data, userId));
+                    }
+                }
+            }
+            return models;
+        });
+    }
+
+    @Override
     public Promise<List<AppInfo>, Throwable, Void> getInstalledApps(Context context) {
         return VUiKit.defer().when(() -> convertPackageInfoToAppData(context, context.getPackageManager().getInstalledPackages(0), true));
     }
 
     @Override
+    public Promise<List<AppInfo>, Throwable, Void> getInstalledXposedModules(Context context) {
+        return VUiKit.defer().when(() -> convertPackageInfoToAppData(context, context.getPackageManager().getInstalledPackages(0), true));
+    }
+
+    @Override
     public Promise<List<AppInfo>, Throwable, Void> getStorageApps(Context context, File rootDir) {
-        Promise<List<AppInfo>, Throwable, Void> when = VUiKit.defer().when(() -> convertPackageInfoToAppData(context, findAndParseAPKs(context, rootDir, SCAN_PATH_LIST), false));
-        return when;
+        return VUiKit.defer().when(() -> convertPackageInfoToAppData(context, findAndParseAPKs(context, rootDir, SCAN_PATH_LIST), false));
     }
 
     private List<PackageInfo> findAndParseAPKs(Context context, File rootDir, List<String> paths) {

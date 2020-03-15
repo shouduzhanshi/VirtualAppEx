@@ -6,6 +6,7 @@ import android.content.pm.PackageManager;
 import android.graphics.drawable.Drawable;
 
 import com.lody.virtual.remote.InstalledAppInfo;
+import com.lody.virtual.server.pm.parser.VPackage;
 
 /**
  * @author Lody
@@ -14,22 +15,19 @@ public class PackageAppData implements AppData {
 
     public String packageName;
     public String name;
+    public String versionName;
     public Drawable icon;
     public boolean fastOpen;
     public boolean isFirstOpen;
     public boolean isLoading;
-
-    public boolean isFastOpen() {
-        return fastOpen;
-    }
+    public VPackage.XposedModule xposedModule;
 
     public PackageAppData(Context context, InstalledAppInfo installedAppInfo) {
         this.packageName = installedAppInfo.packageName;
         this.isFirstOpen = !installedAppInfo.isLaunched(0);
+        this.xposedModule = installedAppInfo.xposedModule;
+        versionName = installedAppInfo.getPackageInfo(0).versionName;
         loadData(context, installedAppInfo.getApplicationInfo(installedAppInfo.getInstalledUsers()[0]));
-    }
-
-    public PackageAppData() {
     }
 
     private void loadData(Context context, ApplicationInfo appInfo) {
@@ -69,6 +67,16 @@ public class PackageAppData implements AppData {
     }
 
     @Override
+    public String getPackageName() {
+        return packageName;
+    }
+
+    @Override
+    public String versionName() {
+        return versionName;
+    }
+
+    @Override
     public boolean canReorder() {
         return true;
     }
@@ -88,32 +96,8 @@ public class PackageAppData implements AppData {
         return true;
     }
 
-
-    public void setPackageName(String packageName) {
-        this.packageName = packageName;
-    }
-
-    public void setName(String name) {
-        this.name = name;
-    }
-
-    public void setIcon(Drawable icon) {
-        this.icon = icon;
-    }
-
-    public void setFastOpen(boolean fastOpen) {
-        this.fastOpen = fastOpen;
-    }
-
-    public void setFirstOpen(boolean firstOpen) {
-        isFirstOpen = firstOpen;
-    }
-
-    public void setLoading(boolean loading) {
-        isLoading = loading;
-    }
-
-    public String getPackageName() {
-        return packageName;
+    @Override
+    public VPackage.XposedModule getXposedModule() {
+        return xposedModule;
     }
 }

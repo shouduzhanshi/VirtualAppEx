@@ -7,8 +7,6 @@ import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
 
-import butterknife.BindView;
-import butterknife.BindViews;
 import io.virtualapp.R;
 import io.virtualapp.abs.ui.BaseAdapterPlus;
 import io.virtualapp.home.models.LocationData;
@@ -38,18 +36,15 @@ public class AppLocationAdapter extends BaseAdapterPlus<LocationData> {
         }
     }
 
-    static class ViewHolder extends BaseAdapterPlus.BaseViewHolder {
-        @BindView(R.id.item_app_icon)
-        ImageView icon;
-        @BindView(R.id.item_app_name)
-        TextView label;
-        @BindView(R.id.item_location)
-        TextView location;
-
+    static class ViewHolder extends BaseViewHolder {
         public ViewHolder(View view) {
             super(view);
+            icon = $(R.id.item_app_icon);
+            label = $(R.id.item_app_name);
+            location = $(R.id.item_location);
         }
 
-
+        final ImageView icon;
+        final TextView label, location;
     }
 }
