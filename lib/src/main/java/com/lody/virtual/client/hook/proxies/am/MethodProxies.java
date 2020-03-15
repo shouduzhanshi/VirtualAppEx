@@ -31,6 +31,7 @@ import android.text.TextUtils;
 import android.util.Log;
 import android.util.TypedValue;
 
+import com.android.dx.Local;
 import com.lody.virtual.client.VClientImpl;
 import com.lody.virtual.client.badger.BadgerManager;
 import com.lody.virtual.client.core.VirtualCore;
@@ -57,6 +58,7 @@ import com.lody.virtual.helper.utils.BitmapUtils;
 import com.lody.virtual.helper.utils.ComponentUtils;
 import com.lody.virtual.helper.utils.DrawableUtils;
 import com.lody.virtual.helper.utils.FileUtils;
+import com.lody.virtual.helper.utils.OSUtils;
 import com.lody.virtual.helper.utils.Reflect;
 import com.lody.virtual.helper.utils.VLog;
 import com.lody.virtual.os.VUserHandle;
@@ -847,6 +849,26 @@ class MethodProxies {
     }
 
 
+    static class BindServiceQ extends BindService {
+
+        @Override
+        public String getMethodName() {
+            return "bindIsolatedService";
+        }
+
+        @Override
+        public Object call(Object who, Method method, Object... args) throws Throwable {
+            args[7] = VirtualCore.get().getHostPkg();
+            return super.call(who, method, args);
+        }
+
+        @Override
+        public boolean isEnable() {
+            return isAppProcess() || isServerProcess();
+        }
+    }
+
+
     static class BindService extends MethodProxy {
 
         @Override
@@ -1357,6 +1379,9 @@ class MethodProxies {
         public Object call(Object who, Method method, Object... args) throws Throwable {
             int nameIdx = getProviderNameIndex();
             String name = (String) args[nameIdx];
+            if (OSUtils.getInstance().isAndroidQ()) {
+                MethodParameterUtils.replaceFirstAppPkg(args);
+            }
             int userId = VUserHandle.myUserId();
             ProviderInfo info = VPackageManager.get().resolveContentProvider(name, 0, userId);
             if (info != null && info.enabled && isAppPkg(info.packageName)) {
@@ -1410,7 +1435,11 @@ class MethodProxies {
 
 
         public int getProviderNameIndex() {
-            return 1;
+            if (OSUtils.getInstance().isAndroidQ()) {
+                return 2;
+            } else {
+                return 1;
+            }
         }
 
         @Override

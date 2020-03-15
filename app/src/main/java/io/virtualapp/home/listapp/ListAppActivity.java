@@ -19,6 +19,8 @@ import android.support.v7.app.ActionBar;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.MenuItem;
+import android.view.View;
+import android.widget.FrameLayout;
 
 import com.lody.virtual.client.core.VirtualCore;
 import com.lody.virtual.os.VUserInfo;
@@ -42,6 +44,7 @@ import io.virtualapp.home.models.AppInfoLite;
 import io.virtualapp.home.models.MultiplePackageAppData;
 import io.virtualapp.home.models.PackageAppData;
 import io.virtualapp.home.repo.PackageAppDataStorage;
+import io.virtualapp.widgets.TwoGearsView;
 import okio.BufferedSink;
 import okio.BufferedSource;
 import okio.Okio;
@@ -54,6 +57,12 @@ public class ListAppActivity extends VActivity {
 
     @BindView(R.id.clone_app_tool_bar)
      Toolbar mToolBar;
+
+    @BindView(R.id.pb_loading_app)
+    TwoGearsView mLoadingView;
+
+    @BindView(R.id.clone_app_view_pager)
+    FrameLayout clone_app_view_pager;
 
     public static void gotoListApp(Activity activity) {
         Intent intent = new Intent(activity, ListAppActivity.class);
@@ -94,6 +103,7 @@ public class ListAppActivity extends VActivity {
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
         if (9101 == requestCode && data != null) {
+            showLoading();
             VUiKit.defer().when(() -> {
                 ArrayList<AppInfoLite> dataList = new ArrayList<>();
                 try {
@@ -114,15 +124,16 @@ public class ListAppActivity extends VActivity {
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
-                setResult(RESULT_OK,data);
-                finish();
             }).then((res) -> {
 
             }).done(res -> {
-
+                hideLoading();
+                setResult(RESULT_OK,data);
+                finish();
             });
         }
     }
+
 
     private void setupToolBar() {
         setSupportActionBar(mToolBar);
@@ -151,5 +162,17 @@ public class ListAppActivity extends VActivity {
                 break;
             }
         }
+    }
+
+    public void showLoading() {
+        clone_app_view_pager.setVisibility(View.INVISIBLE);
+        mLoadingView.setVisibility(View.VISIBLE);
+        mLoadingView.startAnim();
+    }
+
+    public void hideLoading() {
+        clone_app_view_pager.setVisibility(View.VISIBLE);
+        mLoadingView.setVisibility(View.GONE);
+        mLoadingView.stopAnim();
     }
 }

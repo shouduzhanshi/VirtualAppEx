@@ -6,6 +6,7 @@ import android.os.Build;
 import android.os.IBinder;
 import android.os.RemoteCallbackList;
 import android.os.RemoteException;
+import android.util.Log;
 
 import com.lody.virtual.client.core.InstallStrategy;
 import com.lody.virtual.client.core.VirtualCore;
@@ -20,6 +21,7 @@ import com.lody.virtual.os.VEnvironment;
 import com.lody.virtual.os.VUserHandle;
 import com.lody.virtual.remote.InstallResult;
 import com.lody.virtual.remote.InstalledAppInfo;
+import com.lody.virtual.sandxposed.XposedModuleProfile;
 import com.lody.virtual.server.accounts.VAccountManagerService;
 import com.lody.virtual.server.am.BroadcastSystem;
 import com.lody.virtual.server.am.UidSystem;
@@ -189,6 +191,9 @@ public class VAppManagerService implements IAppManager {
         boolean dependSystem = (flags & InstallStrategy.DEPEND_SYSTEM_IF_EXIST) != 0
                 && VirtualCore.get().isOutsideInstalled(pkg.packageName);
 
+        //for sanvxposed disable inline
+//        dependSystem = false;
+
         if (existSetting != null && existSetting.dependSystem) {
             dependSystem = false;
         }
@@ -242,10 +247,12 @@ public class VAppManagerService implements IAppManager {
             boolean runDexOpt = false;
             if (VirtualRuntime.isArt()) {
                 try {
+                    Log.e("ArtDexOptimizer", "run dex2oat");
                     ArtDexOptimizer.interpretDex2Oat(ps.apkPath, VEnvironment.getOdexFile(ps.packageName).getPath());
                 } catch (IOException e) {
                     e.printStackTrace();
                     runDexOpt = true;
+                    Log.e("ArtDexOptimizer", "dex2oat error");
                 }
             } else {
                 runDexOpt = true;
@@ -387,9 +394,21 @@ public class VAppManagerService implements IAppManager {
     @Override
     public List<InstalledAppInfo> getInstalledApps(int flags) {
         List<InstalledAppInfo> infoList = new ArrayList<>(getInstalledAppCount());
+        boolean filterXposedModules = (flags & InstalledAppInfo.FLAG_XPOSED_MODULE) != 0;
+        boolean excludeXposedModules = (flags & InstalledAppInfo.FLAG_EXCLUDE_XPOSED_MODULE) != 0;
+        boolean enabledXposedModules = (flags & InstalledAppInfo.FLAG_ENABLED_XPOSED_MODULE) != 0;
         for (VPackage p : PackageCacheManager.PACKAGE_CACHE.values()) {
-            PackageSetting setting = (PackageSetting) p.mExtras;
-            infoList.add(setting.getAppInfo());
+            if (excludeXposedModules) {
+                if (p.xposedModule == null) {
+                    PackageSetting setting = (PackageSetting) p.mExtras;
+                    infoList.add(setting.getAppInfo());
+                }
+            } else if (!filterXposedModules || p.xposedModule != null) {
+                if (!enabledXposedModules || (XposedModuleProfile.isXposedEnable() && XposedModuleProfile.isModuleEnable(p.packageName))) {
+                    PackageSetting setting = (PackageSetting) p.mExtras;
+                    infoList.add(setting.getAppInfo());
+                }
+            }
         }
         return infoList;
     }

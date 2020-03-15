@@ -19,10 +19,17 @@ public class PackageAppData implements AppData {
     public boolean isFirstOpen;
     public boolean isLoading;
 
+    public boolean isFastOpen() {
+        return fastOpen;
+    }
+
     public PackageAppData(Context context, InstalledAppInfo installedAppInfo) {
         this.packageName = installedAppInfo.packageName;
         this.isFirstOpen = !installedAppInfo.isLaunched(0);
         loadData(context, installedAppInfo.getApplicationInfo(installedAppInfo.getInstalledUsers()[0]));
+    }
+
+    public PackageAppData() {
     }
 
     private void loadData(Context context, ApplicationInfo appInfo) {
@@ -79,5 +86,34 @@ public class PackageAppData implements AppData {
     @Override
     public boolean canCreateShortcut() {
         return true;
+    }
+
+
+    public void setPackageName(String packageName) {
+        this.packageName = packageName;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public void setIcon(Drawable icon) {
+        this.icon = icon;
+    }
+
+    public void setFastOpen(boolean fastOpen) {
+        this.fastOpen = fastOpen;
+    }
+
+    public void setFirstOpen(boolean firstOpen) {
+        isFirstOpen = firstOpen;
+    }
+
+    public void setLoading(boolean loading) {
+        isLoading = loading;
+    }
+
+    public String getPackageName() {
+        return packageName;
     }
 }

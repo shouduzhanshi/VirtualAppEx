@@ -24,7 +24,7 @@ public class PackageParserP {
     }
     @MethodReflectParams({"android.content.pm.PackageParser$Package", "boolean"})
     public static RefMethod<Void> collectCertificates;
-    public static RefConstructor<android.content.pm.PackageParser> ctor;
+    public static RefConstructor<PackageParser> ctor;
     @MethodReflectParams({"android.content.pm.PackageParser$Activity", "int", "android.content.pm.PackageUserState", "int"})
     public static RefStaticMethod<ActivityInfo> generateActivityInfo;
     @MethodReflectParams({"android.content.pm.PackageParser$Package", "int", "android.content.pm.PackageUserState"})

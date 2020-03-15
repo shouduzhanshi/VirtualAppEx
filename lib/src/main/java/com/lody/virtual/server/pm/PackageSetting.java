@@ -12,7 +12,7 @@ import com.lody.virtual.remote.InstalledAppInfo;
 
 public class PackageSetting implements Parcelable {
 
-    public static final Parcelable.Creator<PackageSetting> CREATOR = new Parcelable.Creator<PackageSetting>() {
+    public static final Creator<PackageSetting> CREATOR = new Creator<PackageSetting>() {
         @Override
         public PackageSetting createFromParcel(Parcel source) {
             return new PackageSetting(source);
@@ -50,7 +50,7 @@ public class PackageSetting implements Parcelable {
     }
 
     public InstalledAppInfo getAppInfo() {
-        return new InstalledAppInfo(packageName, apkPath, libPath, dependSystem, skipDexOpt, appId);
+        return new InstalledAppInfo(packageName, apkPath, libPath, dependSystem, skipDexOpt, appId, PackageCacheManager.get(packageName).xposedModule);
     }
 
     PackageUserState modifyUserState(int userId) {

@@ -6,18 +6,11 @@ import android.content.Context;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.util.Log;
-
 import com.lody.virtual.client.core.VirtualCore;
 import com.lody.virtual.client.stub.VASettings;
 import com.yc.nonsdk.NonSdkManager;
-
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
-
 import java.util.ArrayList;
 import java.util.List;
-
-import dalvik.system.DexClassLoader;
 import io.virtualapp.delegate.MyAppRequestListener;
 import io.virtualapp.delegate.MyComponentDelegate;
 import io.virtualapp.delegate.MyPhoneInfoDelegate;
@@ -129,7 +122,7 @@ public class VApp extends Application implements Application.ActivityLifecycleCa
                 virtualCore.addVisibleOutsidePackage("com.tencent.qqlite");
                 virtualCore.addVisibleOutsidePackage("com.facebook.katana");
                 virtualCore.addVisibleOutsidePackage("com.whatsapp");
-                virtualCore.addVisibleOutsidePackage("com.tencent.mm");
+//                virtualCore.addVisibleOutsidePackage("com.tencent.mm");
                 virtualCore.addVisibleOutsidePackage("com.immomo.momo");
             }
         });

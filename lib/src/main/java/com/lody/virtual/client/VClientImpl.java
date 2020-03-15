@@ -21,7 +21,6 @@ import android.os.IBinder;
 import android.os.IInterface;
 import android.os.Looper;
 import android.os.Message;
-import android.os.Parcelable;
 import android.os.Process;
 import android.os.RemoteException;
 import android.os.StrictMode;
@@ -41,6 +40,7 @@ import com.lody.virtual.client.ipc.VActivityManager;
 import com.lody.virtual.client.ipc.VDeviceManager;
 import com.lody.virtual.client.ipc.VPackageManager;
 import com.lody.virtual.client.ipc.VirtualStorageManager;
+import com.lody.virtual.sandxposed.SandXposed;
 import com.lody.virtual.client.stub.VASettings;
 import com.lody.virtual.helper.compat.BuildCompat;
 import com.lody.virtual.helper.compat.StorageManagerCompat;
@@ -295,7 +295,7 @@ public final class VClientImpl extends IVClient.Stub {
         }
         Object boundApp = fixBoundApp(mBoundApplication);
         mBoundApplication.info = ContextImpl.mPackageInfo.get(context);
-        mirror.android.app.ActivityThread.AppBindData.info.set(boundApp, data.info);
+        ActivityThread.AppBindData.info.set(boundApp, data.info);
         VMRuntime.setTargetSdkVersion.call(VMRuntime.getRuntime.call(), data.appInfo.targetSdkVersion);
 
         Configuration configuration = context.getResources().getConfiguration();
@@ -313,8 +313,13 @@ public final class VClientImpl extends IVClient.Stub {
         if (!conflict) {
             InvocationStubManager.getInstance().checkEnv(AppInstrumentation.class);
         }
+
+        SandXposed.injectXposedModule(context, packageName, processName);
+
         mInitialApplication = LoadedApk.makeApplication.call(data.info, false, null);
-        mirror.android.app.ActivityThread.mInitialApplication.set(mainThread, mInitialApplication);
+
+
+        ActivityThread.mInitialApplication.set(mainThread, mInitialApplication);
         ContextFixer.fixContext(mInitialApplication);
         if (Build.VERSION.SDK_INT >= 24 && "com.tencent.mm:recovery".equals(processName)) {
             fixWeChatRecovery(mInitialApplication);
@@ -327,6 +332,8 @@ public final class VClientImpl extends IVClient.Stub {
             mTempLock = null;
         }
         VirtualCore.get().getComponentDelegate().beforeApplicationCreate(mInitialApplication);
+
+
         try {
             mInstrumentation.callApplicationOnCreate(mInitialApplication);
             InvocationStubManager.getInstance().checkEnv(HCallbackStub.class);
@@ -459,10 +466,10 @@ public final class VClientImpl extends IVClient.Stub {
 
     private Object fixBoundApp(AppBindData data) {
         Object thread = VirtualCore.mainThread();
-        Object boundApp = mirror.android.app.ActivityThread.mBoundApplication.get(thread);
-        mirror.android.app.ActivityThread.AppBindData.appInfo.set(boundApp, data.appInfo);
-        mirror.android.app.ActivityThread.AppBindData.processName.set(boundApp, data.processName);
-        mirror.android.app.ActivityThread.AppBindData.instrumentationName.set(
+        Object boundApp = ActivityThread.mBoundApplication.get(thread);
+        ActivityThread.AppBindData.appInfo.set(boundApp, data.appInfo);
+        ActivityThread.AppBindData.processName.set(boundApp, data.processName);
+        ActivityThread.AppBindData.instrumentationName.set(
                 boundApp,
                 new ComponentName(data.appInfo.packageName, Instrumentation.class.getName())
         );

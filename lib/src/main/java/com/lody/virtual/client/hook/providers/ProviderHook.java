@@ -10,6 +10,7 @@ import android.os.IInterface;
 import android.os.ParcelFileDescriptor;
 
 import com.lody.virtual.client.hook.base.MethodBox;
+import com.lody.virtual.helper.utils.OSUtils;
 import com.lody.virtual.helper.utils.VLog;
 
 import java.lang.reflect.InvocationHandler;
@@ -87,7 +88,7 @@ public class ProviderHook implements InvocationHandler {
         if (provider instanceof Proxy && Proxy.getInvocationHandler(provider) instanceof ProviderHook) {
             return provider;
         }
-        ProviderHook.HookFetcher fetcher = ProviderHook.fetchHook(authority);
+        HookFetcher fetcher = ProviderHook.fetchHook(authority);
         if (fetcher != null) {
             ProviderHook hook = fetcher.fetch(external, provider);
             IInterface proxyProvider = ProviderHook.createProxy(provider, hook);
@@ -149,6 +150,9 @@ public class ProviderHook implements InvocationHandler {
         try {
             String name = method.getName();
             if ("call".equals(name)) {
+                if (OSUtils.getInstance().isAndroidQ()) {
+                    start = 2;
+                }
                 String methodName = (String) args[start];
                 String arg = (String) args[start + 1];
                 Bundle extras = (Bundle) args[start + 2];

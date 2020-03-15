@@ -39,20 +39,21 @@ import io.virtualapp.abs.ui.VActivity;
 import io.virtualapp.R;
 
 public class MarkerActivity extends VActivity implements TencentMap.OnMapClickListener, TencentLocationListener {
+
     private TencentMap mMap;
     @BindView(R.id.map)
-     MapView mapView;
+    MapView mapView;
     private LatLng mLatLng = new LatLng(39.9182645956, 116.3970032689);
 
     @BindView(R.id.address)
-     TextView pathText;
+    TextView pathText;
     private TencentSearch geocoderSearch;
     private String mAddress;
     private boolean isNoPoint = true;
     private VLocation mVLocation;
 
     @BindView(R.id.task_top_toolbar)
-     Toolbar toolbar;
+    Toolbar toolbar;
 
     @Override
     public int setViewRes() {
