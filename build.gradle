@@ -2,11 +2,15 @@
 
 buildscript {
     repositories {
+        maven{ url 'http://maven.aliyun.com/nexus/content/groups/public/' }
+        maven{ url 'http://maven.aliyun.com/nexus/content/repositories/jcenter'}
+        maven { url "https://jitpack.io" }
+        maven { url "http://repo.baichuan-android.taobao.com/content/groups/BaichuanRepositories/" }
+        maven { url 'http://maven.aliyun.com/nexus/content/repositories/releases/' }
+        maven { url 'https://dl.bintray.com/umsdk/release' }
+        maven { url 'https://dl.bintray.com/aweme-open-sdk-team/public' }
+        google()
         jcenter()
-        maven {
-            url 'https://maven.google.com/'
-            name 'Google'
-        }
     }
     dependencies {
         classpath 'com.android.tools.build:gradle:3.3.2'
@@ -20,22 +24,15 @@ buildscript {
 
 allprojects {
     repositories {
-        jcenter()
-        google()
-        maven {
-            url "https://jitpack.io"
-        }
-        maven {
-            url 'https://maven.google.com/'
-            name 'Google'
-        }
-        maven { url 'http://maven.aliyun.com/nexus/content/repositories/releases/' }
-        maven {
-            url "http://repo.baichuan-android.taobao.com/content/groups/BaichuanRepositories/"
-        }
+        maven{ url 'http://maven.aliyun.com/nexus/content/groups/public/' }
+        maven{ url 'http://maven.aliyun.com/nexus/content/repositories/jcenter'}
+        maven { url "https://jitpack.io" }
+        maven { url "http://repo.baichuan-android.taobao.com/content/groups/BaichuanRepositories/" }
         maven { url 'http://maven.aliyun.com/nexus/content/repositories/releases/' }
         maven { url 'https://dl.bintray.com/umsdk/release' }
         maven { url 'https://dl.bintray.com/aweme-open-sdk-team/public' }
+        google()
+        jcenter()
     }
 }
 
